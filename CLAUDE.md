@@ -134,22 +134,31 @@ dashboard/  configs/  models/  results/  reports/  notebooks/
 - [x] Local env rebuilt on Python 3.12.10 (matches Colab); core tooling installed
 - [x] Day-0 go/no-go gate = PASSED (7778, 25 classes, binary masks, aligned overlays)
 - [x] Segmentation package built (U-Net + DeepLabV3+, Dice+BCE, 3-seed harness); split + metrics
-      unit-tested; placed in repo, committed, pushed
-- [x] Data on Colab via **git clone of the HF dataset repo** (snapshot_download kept hanging on
-      15k small files; git-LFS transport fixed it). Images verified real (not LFS stubs).
-- [x] Frozen stratified split created: train=4648, internal-val=806, seed=42 (Rolled pit thinnest: 30/5)
-- [x] **SMOKE TEST PASSED (huge): U-Net, 1 seed, 2 epochs -> IoU 63.23 / Dice 77.47 / AUROC 95.44.**
-      Paper zero-shot best = 37.49 IoU. Supervised beats it by ~+25.7 pts even undertrained.
-      => Thesis premise empirically validated; pipeline correct end-to-end.
-- [x] **TWO FULL U-Net RUNS COMPLETE (banked to laptop as JSON):**
-      seed0: IoU 78.18 / F1max 87.75 / AUROC 97.44 / IoU_macro 71.73
-      seed1: IoU 77.72 / F1max 87.46 / AUROC 97.76 / IoU_macro 71.41
-      => U-Net ~77.95 ± 0.23 IoU vs paper zero-shot 37.49 = +40 pts. Seeds agree to <0.5 IoU (stable).
-      Best classes: Punching 0.95, Crescent gap 0.93. Worst: Rolled pit 0.44-0.48 (rarest, n=15, diffuse),
-      Waist folding 0.44-0.46, Crazing 0.48-0.52. Rare-but-crisp (Oxide plate, n=18) still 0.80+.
-- [ ] **REMAINING sweep: U-Net seed2 + DeepLabV3+ x3 seeds** (Colab free tier ran out mid-sweep;
-      next session needs Drive persistence + resume-skip-completed so it survives disconnects)
-- [ ] Free Colab can't do all 6 runs in one session — set up resumable sweep for next time
+      unit-tested; resume guard + Drive/Kaggle persistence added; aggregate.py for final tables
+- [x] Data on Colab/Kaggle via **git clone of the HF dataset repo** (snapshot_download hangs on 15k files)
+- [x] Frozen stratified split: train=4648, internal-val=806, seed=42 (Rolled pit thinnest 30/5)
+- [x] **TWO FULL U-Net RUNS DONE:** seed0 IoU 78.18, seed1 IoU 77.72 => 77.95 ± 0.23 vs paper 37.49 (+40.46 pts)
+      Best classes: Punching 95, Crescent gap 94. Worst: Waist folding 45, Rolled pit 46 (rarest/diffuse).
+
+## Fine-tuning framing (for CV + report — state ACCURATELY)
+
+We fine-tuned an **ImageNet-pretrained ResNet34 encoder** (full fine-tune, backbone NOT frozen) + trained a
+**randomly-initialized** U-Net/DeepLabV3+ decoder end-to-end on the masks, Dice+BCE objective. This is
+transfer learning with a standard CNN — NOT CLIP, NOT a foundation model, NOT pretraining from scratch.
+**Do NOT claim "fine-tuned CLIP" anywhere** — we have not (yet) touched CLIP. The paper fine-tuned CLIP-Adapter
+for CLASSIFICATION; we did supervised SEGMENTATION with a CNN. Keep these distinct.
+
+## Roadmap order (locked)
+
+1. [ ] **Finish segmentation sweep** — U-Net seed2 + DeepLabV3+ x3 (on Kaggle T4; P100 broke w/ sm_60 CUDA mismatch)
+2. [ ] Uncertainty + calibration (MC-Dropout, ECE, reliability diagram)
+3. [ ] Deterministic T3-style attribute extraction from predicted masks + LLM diagnostic layer
+       (grounded in the 25 real T1 cause sentences; diagnostic not descriptive)
+4. [ ] Streamlit dashboard MVP
+5. [ ] Report ("paper vs our additions") + public GitHub
+6. [ ] **DEFERRED / CV-earning (do LAST):** reproduce paper's CLIP-Adapter CLASSIFICATION (1-2 configs, ~94% acc).
+       This is the ONLY legitimate way to put "CLIP" on the CV. Secondary — the paper already solved
+       classification; reproducing it proves capability but isn't our contribution. Not before core is done.
 - [ ] Uncertainty + calibration; attribute extraction + LLM diagnostic layer; dashboard
 - [ ] Segmentation baseline (hard checkpoint)
 - [ ] Uncertainty + calibration
