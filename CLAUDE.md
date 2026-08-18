@@ -132,13 +132,25 @@ dashboard/  configs/  models/  results/  reports/  notebooks/
 
 - [x] Repos reviewed, scope locked, go/no-go = conditional GO
 - [x] Local env rebuilt on Python 3.12.10 (matches Colab); core tooling installed
-- [x] **Day-0 go/no-go gate = PASSED.** Evidence: metadata confirms 7778 (5454 train + 2324 val), 25 classes
-      with real names + T1 causes; T3 schema verified (Position = ranked [cell, fraction] list); sample of 40
-      pairs had 0 missing masks (naming = train_mask/<stem>.png); masks binary (27/40 strictly, 13 anti-aliased
-      edges that binarize cleanly at >127); overlays aligned incl. rarest class Rolled pit (35 imgs).
-      Rarest 3 classes: Rolled pit (35), Oxide scale of plate system (45), Crease (53).
-- [ ] **NEXT: frozen split** — carve internal val from train (stratified by class), keep official val as test
-- [ ] Segmentation baseline (U-Net / DeepLabV3+, Dice+BCE, 3 seeds) ← FLAGSHIP, starts now
+- [x] Day-0 go/no-go gate = PASSED (7778, 25 classes, binary masks, aligned overlays)
+- [x] Segmentation package built (U-Net + DeepLabV3+, Dice+BCE, 3-seed harness); split + metrics
+      unit-tested; placed in repo, committed, pushed
+- [x] Data on Colab via **git clone of the HF dataset repo** (snapshot_download kept hanging on
+      15k small files; git-LFS transport fixed it). Images verified real (not LFS stubs).
+- [x] Frozen stratified split created: train=4648, internal-val=806, seed=42 (Rolled pit thinnest: 30/5)
+- [x] **SMOKE TEST PASSED (huge): U-Net, 1 seed, 2 epochs -> IoU 63.23 / Dice 77.47 / AUROC 95.44.**
+      Paper zero-shot best = 37.49 IoU. Supervised beats it by ~+25.7 pts even undertrained.
+      => Thesis premise empirically validated; pipeline correct end-to-end.
+- [x] **TWO FULL U-Net RUNS COMPLETE (banked to laptop as JSON):**
+      seed0: IoU 78.18 / F1max 87.75 / AUROC 97.44 / IoU_macro 71.73
+      seed1: IoU 77.72 / F1max 87.46 / AUROC 97.76 / IoU_macro 71.41
+      => U-Net ~77.95 ± 0.23 IoU vs paper zero-shot 37.49 = +40 pts. Seeds agree to <0.5 IoU (stable).
+      Best classes: Punching 0.95, Crescent gap 0.93. Worst: Rolled pit 0.44-0.48 (rarest, n=15, diffuse),
+      Waist folding 0.44-0.46, Crazing 0.48-0.52. Rare-but-crisp (Oxide plate, n=18) still 0.80+.
+- [ ] **REMAINING sweep: U-Net seed2 + DeepLabV3+ x3 seeds** (Colab free tier ran out mid-sweep;
+      next session needs Drive persistence + resume-skip-completed so it survives disconnects)
+- [ ] Free Colab can't do all 6 runs in one session — set up resumable sweep for next time
+- [ ] Uncertainty + calibration; attribute extraction + LLM diagnostic layer; dashboard
 - [ ] Segmentation baseline (hard checkpoint)
 - [ ] Uncertainty + calibration
 - [ ] Attribute extraction + LLM diagnostic layer

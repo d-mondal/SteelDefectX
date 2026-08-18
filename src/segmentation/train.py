@@ -44,7 +44,17 @@ def evaluate(model, loader, device, cfg):
     return acc.compute()
 
 
-def train_one_run(cfg, arch: str, seed: int, device=None):
+def train_one_run(cfg, arch: str, seed: int, device=None, force: bool = False):
+    """Train one (arch, seed) run. If its result JSON already exists on disk and
+    force=False, SKIP training and return the saved metrics — this is what makes the
+    sweep resumable across Colab sessions (free tier can't do all 6 in one sitting)."""
+    run_name = f"{arch}_{cfg.encoder}_seed{seed}"
+    out_dir = Path(cfg.out_dir)
+    result_path = out_dir / f"{run_name}_test_metrics.json"
+    if result_path.exists() and not force:
+        print(f"[skip] {run_name} already done -> {result_path}")
+        return json.loads(result_path.read_text(encoding="utf-8"))
+
     device = device or ("cuda" if torch.cuda.is_available() else "cpu")
     set_seed(seed)
 
@@ -58,7 +68,7 @@ def train_one_run(cfg, arch: str, seed: int, device=None):
     sched = torch.optim.lr_scheduler.ReduceLROnPlateau(opt, mode="max", factor=0.5, patience=3)
     criterion = DiceBCELoss(dice_weight=cfg.dice_weight)
 
-    run_name = f"{arch}_{cfg.encoder}_seed{seed}"
+    out_dir.mkdir(parents=True, exist_ok=True)
     wb = None
     if cfg.use_wandb:
         try:
@@ -109,13 +119,14 @@ def train_one_run(cfg, arch: str, seed: int, device=None):
         wb.log({f"test_{k}": v for k, v in test_metrics.items() if not isinstance(v, dict)})
         wb.finish()
 
-    out_dir = Path(cfg.out_dir); out_dir.mkdir(parents=True, exist_ok=True)
-    (out_dir / f"{run_name}_test_metrics.json").write_text(
-        json.dumps(test_metrics, indent=2), encoding="utf-8")
+    result_path.write_text(json.dumps(test_metrics, indent=2), encoding="utf-8")
+    print(f"[saved] {run_name} -> {result_path}  (IoU {test_metrics['IoU']})")
     return test_metrics
 
 
 def run_comparison(cfg, archs=("unet", "deeplabv3plus")):
+    """Runs every (arch, seed). Already-completed runs are skipped (loaded from disk),
+    so this is safe to re-run across multiple Colab sessions until all 6 are done."""
     results = {}
     for arch in archs:
         per_seed = [train_one_run(cfg, arch, s) for s in cfg.seeds]
@@ -123,7 +134,8 @@ def run_comparison(cfg, archs=("unet", "deeplabv3plus")):
         for k in ("IoU", "Dice", "AUROC", "F1max", "IoU_macro"):
             vals = [m[k] for m in per_seed]
             agg[k] = (round(float(np.mean(vals)), 2), round(float(np.std(vals)), 2))
-        results[arch] = {"agg": agg, "per_seed": per_seed}
+        results[arch] = {"agg": agg, "per_seed": per_seed,
+                         "n_seeds": len(per_seed)}
 
     # head-to-head table vs paper zero-shot
     pz = cfg.paper_zeroshot
