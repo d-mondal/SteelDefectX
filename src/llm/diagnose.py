@@ -53,12 +53,23 @@ Deterministic measurements of THIS instance:
 Produce the diagnostic JSON now."""
 
 
-def _call_llm(system: str, user: str, provider: str = "anthropic",
+def _call_llm(system: str, user: str, provider: str = "gemini",
               model: str | None = None, max_tokens: int = 400) -> str:
     """Isolated provider call. Swap provider here without touching the rest of the layer.
     Reads the API key from env. Returns the raw text response."""
     provider = provider.lower()
-    if provider == "anthropic":
+    if provider == "gemini":
+        # Google AI Studio — free tier, no credit card. Key from GEMINI_API_KEY.
+        import google.generativeai as genai
+        genai.configure(api_key=os.environ["GEMINI_API_KEY"])
+        gm = genai.GenerativeModel(model or "gemini-2.5-flash",
+                                   system_instruction=system)
+        resp = gm.generate_content(
+            user,
+            generation_config={"max_output_tokens": max_tokens, "temperature": 0.3},
+        )
+        return resp.text
+    elif provider == "anthropic":
         import anthropic
         client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
         resp = client.messages.create(
@@ -93,7 +104,7 @@ def _parse_json(text: str) -> dict:
 
 def diagnose(defect_class: str, t1_cause: str, attributes: dict,
              confidence: float | None = None, uncertainty: float | None = None,
-             provider: str = "anthropic", model: str | None = None) -> dict:
+             provider: str = "gemini", model: str | None = None) -> dict:
     """Full diagnostic call. Returns dict with keys:
        likely_cause, severity, recommended_action, summary, plus _valid (bool) and _raw_response."""
     user = build_user_prompt(defect_class, t1_cause, attributes, confidence, uncertainty)
