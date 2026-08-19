@@ -69,7 +69,7 @@ def _call_llm(system: str, user: str, provider: str = "gemini",
         for attempt in range(3):
             try:
                 resp = client.models.generate_content(
-                    model=model or "gemini-2.5-flash",
+                    model=model or "gemini-3.5-flash-lite",
                     contents=user,
                     config=types.GenerateContentConfig(
                         system_instruction=system,

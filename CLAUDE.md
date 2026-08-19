@@ -168,20 +168,13 @@ for CLASSIFICATION; we did supervised SEGMENTATION with a CNN. Keep these distin
        regions, low on confident cores => uncertainty is meaningful, not noise. Money figure for report.
        Report framing: "well-calibrated (ECE 1.45%) with mild mid-range overconfidence" — don't oversell.
        Deployment model = this dropout-U-Net (produces the uncertainty the dashboard + LLM need).
-3. [ ] Deterministic T3-style attribute extraction from predicted masks + LLM diagnostic layer
-       (grounded in the 25 real T1 cause sentences; diagnostic not descriptive)
-       DECISIONS (locked):
-       - LLM = hosted API, provider-agnostic (call isolated in one fn; swap = 1 line). Resume-legit;
-         the skill shown is CONSTRAINT engineering (structured in, grounded vocab, guards), not model choice.
-       - Pipeline: predicted mask -> [deterministic] T3-style attrs (paper's data_analysis.py formulas)
-         -> [retrieve] T1 cause for the class -> [LLM, constrained] diagnostic note. LLM never sees raw
-         image / never free-invents; it reasons over given facts + given cause. This is the anti-hallucination anchor.
-       - Output = BOTH structured JSON (cause/severity/action) AND prose summary.
-       - Eval = AUTOMATED (human panel not feasible): (1) faithfulness/consistency (output doesn't contradict
-         given attrs), (2) grounding rate (cause drawn from T1 vocab, not invented), (3) structural validity
-         (parses as JSON, all fields present). Report as quantitative %s. Optional tiny self-rated spot-check as bonus.
-       - Contribution framing: paper's T2/T3/T4 are DESCRIPTIVE; paper flags DIAGNOSTIC (cause+action) as
-         future work. This layer does the diagnostic leap = the novel bit.
+3. [x] **LLM diagnostic layer DONE + FULLY EVALUATED.** Gemini (final model: gemini-3.5-flash-lite via
+       google.genai SDK), constrained to T1 causes. **Eval on 250-sample stratified set (10 per class x
+       25 classes): 100% structural validity, 100% grounding, 100% faithfulness** (n=250 => ~98.5% CI lower
+       bound; report as robust). Output genuinely DIAGNOSTIC (cause->action w/ real process knowledge, e.g.
+       White rust -> "quarantine coil, check humidity logs at tempering/coiling"; Slag inclusion -> "inspect
+       hot rolling slag skimmer"). Uses uncertainty signal (flags low-saliency for human review). This is the
+       novel contribution (paper text is descriptive; diagnostic was flagged future work).
 4. [ ] Streamlit dashboard MVP
 5. [ ] Report ("paper vs our additions") + public GitHub
 6. [ ] **DEFERRED / CV-earning (do LAST):** reproduce paper's CLIP-Adapter CLASSIFICATION (1-2 configs, ~94% acc).

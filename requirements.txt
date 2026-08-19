@@ -1,0 +1,42 @@
+# ============================================================
+# SteelDefectX BTP — full project dependencies
+# One file for the whole system: segmentation, uncertainty,
+# LLM diagnostic layer, and the Streamlit dashboard.
+#
+# NOTE on torch (Windows CPU): if `pip install torch` fails to
+# load (WinError 1114 / c10.dll), install the CPU build explicitly:
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+# and ensure the MSVC++ redistributable is installed (aka.ms/vc14/vc_redist.x64.exe).
+# On Colab/Kaggle, torch is preinstalled with CUDA — skip it there.
+# ============================================================
+
+# --- deep learning / segmentation ---
+torch
+torchvision
+segmentation-models-pytorch>=0.3.3
+albumentations>=1.4.0
+torchmetrics>=1.3.0
+
+# --- data / imaging ---
+numpy>=1.24
+opencv-python>=4.8.0
+pandas>=2.0
+huggingface_hub>=0.20.0
+
+# --- plotting (uncertainty reliability diagram, heatmaps, analytics) ---
+matplotlib>=3.7.0
+
+# --- LLM diagnostic layer ---
+google-genai>=1.0.0
+python-dotenv>=1.0.0
+
+# --- dashboard ---
+streamlit>=1.30
+
+# --- notebooks ---
+jupyter
+ipykernel
+tqdm>=4.60.0
+
+# --- optional experiment tracking ---
+# wandb>=0.16.0

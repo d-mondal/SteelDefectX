@@ -1,136 +1,160 @@
 {
   "overall": {
-    "n": 21,
+    "n": 250,
     "structural_validity_pct": 100.0,
     "grounding_rate_pct": 100.0,
     "faithfulness_pct": 100.0
   },
   "per_class": {
-    "Oxide scale of plate system": {
-      "n": 1,
-      "valid": 1,
-      "ground": 1,
-      "faith": 1
-    },
-    "Crease": {
-      "n": 1,
-      "valid": 1,
-      "ground": 1,
-      "faith": 1
-    },
-    "Welding line": {
-      "n": 1,
-      "valid": 1,
-      "ground": 1,
-      "faith": 1
-    },
-    "Iron scale compression": {
-      "n": 1,
-      "valid": 1,
-      "ground": 1,
-      "faith": 1
-    },
-    "Pitted surface": {
-      "n": 1,
-      "valid": 1,
-      "ground": 1,
-      "faith": 1
+    "Dark scratches": {
+      "n": 10,
+      "valid": 10,
+      "ground": 10,
+      "faith": 10
     },
     "Rolled in scale": {
-      "n": 1,
-      "valid": 1,
-      "ground": 1,
-      "faith": 1
+      "n": 10,
+      "valid": 10,
+      "ground": 10,
+      "faith": 10
     },
-    "Finishing roll printing": {
-      "n": 1,
-      "valid": 1,
-      "ground": 1,
-      "faith": 1
+    "Welding line": {
+      "n": 10,
+      "valid": 10,
+      "ground": 10,
+      "faith": 10
     },
-    "Waist folding": {
-      "n": 1,
-      "valid": 1,
-      "ground": 1,
-      "faith": 1
+    "White rust": {
+      "n": 10,
+      "valid": 10,
+      "ground": 10,
+      "faith": 10
     },
-    "Iron sheet ash": {
-      "n": 1,
-      "valid": 1,
-      "ground": 1,
-      "faith": 1
-    },
-    "Red iron sheet": {
-      "n": 1,
-      "valid": 1,
-      "ground": 1,
-      "faith": 1
-    },
-    "Secondary rust skin": {
-      "n": 1,
-      "valid": 1,
-      "ground": 1,
-      "faith": 1
-    },
-    "Oil spot": {
-      "n": 1,
-      "valid": 1,
-      "ground": 1,
-      "faith": 1
-    },
-    "Silk spot": {
-      "n": 1,
-      "valid": 1,
-      "ground": 1,
-      "faith": 1
-    },
-    "Slag inclusion": {
-      "n": 1,
-      "valid": 1,
-      "ground": 1,
-      "faith": 1
-    },
-    "Crescent gap": {
-      "n": 1,
-      "valid": 1,
-      "ground": 1,
-      "faith": 1
-    },
-    "Water spot": {
-      "n": 1,
-      "valid": 1,
-      "ground": 1,
-      "faith": 1
-    },
-    "Bright scratch": {
-      "n": 1,
-      "valid": 1,
-      "ground": 1,
-      "faith": 1
-    },
-    "Crazing": {
-      "n": 1,
-      "valid": 1,
-      "ground": 1,
-      "faith": 1
-    },
-    "Oxide scale of temperature system": {
-      "n": 1,
-      "valid": 1,
-      "ground": 1,
-      "faith": 1
+    "Punching": {
+      "n": 10,
+      "valid": 10,
+      "ground": 10,
+      "faith": 10
     },
     "Inclusion": {
-      "n": 1,
-      "valid": 1,
-      "ground": 1,
-      "faith": 1
+      "n": 10,
+      "valid": 10,
+      "ground": 10,
+      "faith": 10
+    },
+    "Crescent gap": {
+      "n": 10,
+      "valid": 10,
+      "ground": 10,
+      "faith": 10
+    },
+    "Oil spot": {
+      "n": 10,
+      "valid": 10,
+      "ground": 10,
+      "faith": 10
+    },
+    "Iron sheet ash": {
+      "n": 10,
+      "valid": 10,
+      "ground": 10,
+      "faith": 10
     },
     "Rolled pit": {
-      "n": 1,
-      "valid": 1,
-      "ground": 1,
-      "faith": 1
+      "n": 10,
+      "valid": 10,
+      "ground": 10,
+      "faith": 10
+    },
+    "Crease": {
+      "n": 10,
+      "valid": 10,
+      "ground": 10,
+      "faith": 10
+    },
+    "Red iron sheet": {
+      "n": 10,
+      "valid": 10,
+      "ground": 10,
+      "faith": 10
+    },
+    "Crazing": {
+      "n": 10,
+      "valid": 10,
+      "ground": 10,
+      "faith": 10
+    },
+    "Oxide scale of plate system": {
+      "n": 10,
+      "valid": 10,
+      "ground": 10,
+      "faith": 10
+    },
+    "Silk spot": {
+      "n": 10,
+      "valid": 10,
+      "ground": 10,
+      "faith": 10
+    },
+    "Oxide scale of temperature system": {
+      "n": 10,
+      "valid": 10,
+      "ground": 10,
+      "faith": 10
+    },
+    "Patches": {
+      "n": 10,
+      "valid": 10,
+      "ground": 10,
+      "faith": 10
+    },
+    "Iron scale compression": {
+      "n": 10,
+      "valid": 10,
+      "ground": 10,
+      "faith": 10
+    },
+    "Secondary rust skin": {
+      "n": 10,
+      "valid": 10,
+      "ground": 10,
+      "faith": 10
+    },
+    "Waist folding": {
+      "n": 10,
+      "valid": 10,
+      "ground": 10,
+      "faith": 10
+    },
+    "Finishing roll printing": {
+      "n": 10,
+      "valid": 10,
+      "ground": 10,
+      "faith": 10
+    },
+    "Pitted surface": {
+      "n": 10,
+      "valid": 10,
+      "ground": 10,
+      "faith": 10
+    },
+    "Water spot": {
+      "n": 10,
+      "valid": 10,
+      "ground": 10,
+      "faith": 10
+    },
+    "Bright scratch": {
+      "n": 10,
+      "valid": 10,
+      "ground": 10,
+      "faith": 10
+    },
+    "Slag inclusion": {
+      "n": 10,
+      "valid": 10,
+      "ground": 10,
+      "faith": 10
     }
   }
 }
