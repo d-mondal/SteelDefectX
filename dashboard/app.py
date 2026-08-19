@@ -22,13 +22,26 @@ from pathlib import Path
 import numpy as np
 import streamlit as st
 
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except Exception:
+    pass
+
 # make 'src' importable when run from repo root
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
+try:
+    from dotenv import load_dotenv as _ld
+    _ld(ROOT / ".env")
+except Exception:
+    pass
 
 st.set_page_config(page_title="SteelDefectX Inspector", layout="wide")
 
 CKPT = str(ROOT / "models" / "unet_dropout.pt")
+CLS_CKPT = str(ROOT / "models" / "classifier.pt")
+CLS_NAMES = str(ROOT / "models" / "class_names.json")
 RESULTS = ROOT / "results"
 LLM_MODEL = "gemini-3.5-flash-lite"   # model used for the eval run
 
@@ -43,6 +56,21 @@ def load_model():
     model.load_state_dict(torch.load(CKPT, map_location=device))
     model.to(device).eval()
     return model, device
+
+
+@st.cache_resource
+def load_classifier():
+    """Returns (net, class_names, device) or (None, None, None) if not trained yet."""
+    if not (os.path.exists(CLS_CKPT) and os.path.exists(CLS_NAMES)):
+        return None, None, None
+    import torch
+    from src.segmentation.classifier import build_classifier
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    names = json.load(open(CLS_NAMES))
+    net = build_classifier(len(names), pretrained=False)
+    net.load_state_dict(torch.load(CLS_CKPT, map_location=device))
+    net.to(device).eval()
+    return net, names, device
 
 
 @st.cache_data
@@ -88,7 +116,7 @@ MEAN = np.array([0.485, 0.456, 0.406])[None, :, None, None]
 STD = np.array([0.229, 0.224, 0.225])[None, :, None, None]
 
 
-def predict(model, device, gray, mc=20):
+def predict(model, device, gray, mc=10):
     import torch
     from src.segmentation.model import enable_mc_dropout
     x = np.stack([gray, gray, gray], 0)[None].astype(np.float32) / 255.0
@@ -135,10 +163,13 @@ with tab1:
     import cv2
     st.subheader("Upload a steel surface image")
     up = st.file_uploader("PNG / JPG", type=["png", "jpg", "jpeg", "bmp"])
-    known_class = st.selectbox(
-        "Defect class (for the diagnostic cause lookup)",
-        options=["(auto: unknown)"] + sorted(load_t1().keys()),
-    )
+    net_cls, cls_names, cls_device = load_classifier()
+    if net_cls is None:
+        st.caption("ℹ️ Classifier not found — train it (notebook 05) to auto-assign the class. "
+                   "You can still pick the class manually below.")
+        manual_class = st.selectbox("Defect class (manual)", options=sorted(load_t1().keys()))
+    else:
+        manual_class = None
     go = st.button("Run inspection", type="primary", disabled=up is None)
 
     if go and up is not None:
@@ -169,15 +200,20 @@ with tab1:
         st.markdown("**Deterministic structured attributes (T3-style):**")
         st.json({k: v for k, v in attrs.items() if k != "_raw"})
 
-        # LLM diagnosis (live -> cached fallback)
+        # ---- classify (auto-assign class) ----
         t1 = load_t1()
-        cls = None if known_class.startswith("(auto") else known_class
+        if net_cls is not None:
+            from src.segmentation.classifier import predict_class
+            cls, cls_conf, _ = predict_class(net_cls, gray, cls_names, cls_device)
+            st.markdown(f"**Predicted class:** {cls}  ·  classifier confidence {cls_conf:.2f}")
+        else:
+            cls = manual_class
+            st.markdown(f"**Class (manual):** {cls}")
+
+        # LLM diagnosis (live -> cached fallback)
         _, diagnoses = load_llm_eval()
         st.markdown("**Diagnostic note:**")
-        if cls is None:
-            st.info("Select the defect class above to ground the diagnostic cause in the dataset's "
-                    "industrial-cause vocabulary. (Class prediction could be added via the classifier.)")
-        else:
+        if True:
             diag, source = None, None
             try:
                 diag = try_live_llm(cls, t1[cls], attrs, conf, float(unc.mean()))
@@ -233,11 +269,16 @@ with tab2:
         st.metric("Expected Calibration Error (ECE)", f"{cal['ECE']}%")
         bins = [b for b in cal["bins"] if b.get("weight")]
         if bins:
-            import pandas as pd
-            rel = pd.DataFrame({"confidence": [b["conf"] for b in bins],
-                                "accuracy": [b["acc"] for b in bins]}).set_index("confidence")
-            st.line_chart(rel)
-            st.caption("Reliability diagram — closer to the diagonal = better calibrated.")
+            import matplotlib.pyplot as plt
+            conf = [b["conf"] for b in bins]
+            acc = [b["acc"] for b in bins]
+            fig, ax = plt.subplots(figsize=(5, 5))
+            ax.plot([0, 1], [0, 1], "k--", label="perfect calibration")
+            ax.plot(conf, acc, "o-", color="#1f77b4", label=f"model (ECE={cal['ECE']}%)")
+            ax.set_xlabel("confidence"); ax.set_ylabel("accuracy")
+            ax.set_xlim(0, 1); ax.set_ylim(0, 1); ax.legend(); ax.set_aspect("equal")
+            st.pyplot(fig)
+            st.caption("Reliability diagram — closer to the dashed diagonal = better calibrated.")
 
 # ===== TAB 3: eval results =====
 with tab3:
@@ -255,14 +296,28 @@ with tab3:
         classes = sorted({d["class_name"] for d in diagnoses})
         pick = st.selectbox("Filter by class", ["(all)"] + classes)
         shown = [d for d in diagnoses if pick == "(all)" or d["class_name"] == pick]
+        @st.cache_data
+        def fetch_val_img(name):
+            try:
+                from huggingface_hub import hf_hub_download
+                import cv2
+                p = hf_hub_download("Zhaosxian/SteelDefectX", f"val/{name}", repo_type="dataset")
+                return cv2.imread(p, cv2.IMREAD_GRAYSCALE)
+            except Exception:
+                return None
+
         for r in shown[:30]:
             d = r["diag"]
             with st.expander(f"{r['image_name']} · {r['class_name']} · conf={r.get('confidence')}"):
-                st.write("**Attributes:**", {k: r["attributes"][k] for k in
-                         ("Shape", "Scale", "Polarity", "Saliency") if k in r.get("attributes", {})})
-                st.write("**Cause:**", d.get("likely_cause"))
-                st.write("**Severity:**", d.get("severity"))
-                st.write("**Action:**", d.get("recommended_action"))
-                st.write("**Summary:**", d.get("summary"))
+                ic1, ic2 = st.columns([1, 2])
+                img = fetch_val_img(r["image_name"])
+                if img is not None:
+                    ic1.image(img, caption=r["image_name"], clamp=True, use_container_width=True)
+                ic2.write("**Attributes:**", {k: r["attributes"][k] for k in
+                          ("Shape", "Scale", "Polarity", "Saliency") if k in r.get("attributes", {})})
+                ic2.write("**Cause:**", d.get("likely_cause"))
+                ic2.write("**Severity:**", d.get("severity"))
+                ic2.write("**Action:**", d.get("recommended_action"))
+                ic2.write("**Summary:**", d.get("summary"))
     else:
         st.info("Run the LLM diagnostic notebook to populate results/llm/.")
