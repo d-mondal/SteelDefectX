@@ -59,16 +59,29 @@ def _call_llm(system: str, user: str, provider: str = "gemini",
     Reads the API key from env. Returns the raw text response."""
     provider = provider.lower()
     if provider == "gemini":
-        # Google AI Studio — free tier, no credit card. Key from GEMINI_API_KEY.
-        import google.generativeai as genai
-        genai.configure(api_key=os.environ["GEMINI_API_KEY"])
-        gm = genai.GenerativeModel(model or "gemini-2.5-flash",
-                                   system_instruction=system)
-        resp = gm.generate_content(
-            user,
-            generation_config={"max_output_tokens": max_tokens, "temperature": 0.3},
-        )
-        return resp.text
+        # Current Google GenAI SDK (google-genai). Stable replacement for the
+        # deprecated google.generativeai. Key from GEMINI_API_KEY.
+        import time as _time
+        from google import genai
+        from google.genai import types
+        client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+        last_err = None
+        for attempt in range(3):
+            try:
+                resp = client.models.generate_content(
+                    model=model or "gemini-2.5-flash-lite",
+                    contents=user,
+                    config=types.GenerateContentConfig(
+                        system_instruction=system,
+                        max_output_tokens=max_tokens,
+                        temperature=0.3,
+                    ),
+                )
+                return resp.text
+            except Exception as e:
+                last_err = e
+                _time.sleep(2 * (attempt + 1))
+        raise last_err
     elif provider == "anthropic":
         import anthropic
         client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
