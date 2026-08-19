@@ -161,14 +161,13 @@ for CLASSIFICATION; we did supervised SEGMENTATION with a CNN. Keep these distin
 ## Roadmap order (locked)
 
 1. [x] **Segmentation sweep COMPLETE** — U-Net + DeepLabV3+ x3 seeds each, done on Kaggle T4. U-Net wins 78.5 vs 75.2.
-2. [ ] **NEXT: Uncertainty + calibration** (MC-Dropout, ECE, reliability diagram) — build on the U-Net (winner)
-       DECISIONS: U-Net only (it's the winner / the model you'd deploy; uncertainty is a deploy-trust feature).
-       METHOD: proper MC-Dropout (named/citable/interview-respected, Gal & Ghahramani 2016 — strong CV line),
-       NOT test-time-augmentation (weak resume value). smp U-Net decoder supports dropout -> add dropout,
-       retrain ONE dropout-U-Net run (~1h Kaggle T4), then ~30 stochastic forward passes for per-pixel
-       uncertainty heatmap + per-image confidence. ECE + reliability diagram on top.
-       HONESTY: dropout-U-Net is a separate variant from the headline 78.5 U-Net; report the uncertainty
-       analysis on the variant, keep the headline seg number as the original 3-seed U-Net. Don't conflate.
+2. [x] **Uncertainty + calibration DONE (dropout-U-Net variant):**
+       ECE = 1.45% (well-calibrated; <2% is very good). Reliability diagram: mild mid-range
+       overconfidence (0.4-0.9 band slightly below diagonal), benign/common for Dice+BCE seg.
+       MC-Dropout heatmaps: uncertainty correctly concentrates on defect BOUNDARIES + faint/fading
+       regions, low on confident cores => uncertainty is meaningful, not noise. Money figure for report.
+       Report framing: "well-calibrated (ECE 1.45%) with mild mid-range overconfidence" — don't oversell.
+       Deployment model = this dropout-U-Net (produces the uncertainty the dashboard + LLM need).
 3. [ ] Deterministic T3-style attribute extraction from predicted masks + LLM diagnostic layer
        (grounded in the 25 real T1 cause sentences; diagnostic not descriptive)
        DECISIONS (locked):

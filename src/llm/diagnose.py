@@ -54,7 +54,7 @@ Produce the diagnostic JSON now."""
 
 
 def _call_llm(system: str, user: str, provider: str = "gemini",
-              model: str | None = None, max_tokens: int = 400) -> str:
+              model: str | None = None, max_tokens: int = 1024) -> str:
     """Isolated provider call. Swap provider here without touching the rest of the layer.
     Reads the API key from env. Returns the raw text response."""
     provider = provider.lower()
@@ -69,12 +69,13 @@ def _call_llm(system: str, user: str, provider: str = "gemini",
         for attempt in range(3):
             try:
                 resp = client.models.generate_content(
-                    model=model or "gemini-2.5-flash-lite",
+                    model=model or "gemini-2.5-flash",
                     contents=user,
                     config=types.GenerateContentConfig(
                         system_instruction=system,
                         max_output_tokens=max_tokens,
                         temperature=0.3,
+                        response_mime_type="application/json",
                     ),
                 )
                 return resp.text
@@ -106,13 +107,21 @@ def _call_llm(system: str, user: str, provider: str = "gemini",
 
 
 def _parse_json(text: str) -> dict:
-    """Extract the JSON object from the model response, robust to stray prose/fences."""
-    text = text.strip()
-    text = re.sub(r"^```(json)?|```$", "", text, flags=re.MULTILINE).strip()
-    m = re.search(r"\{.*\}", text, flags=re.DOTALL)
-    if not m:
+    """Extract the JSON object from the model response, robust to markdown fences,
+    ```json wrappers, and leading/trailing prose."""
+    if not text:
+        raise ValueError("empty response")
+    t = text.strip()
+    # strip a leading ```json or ``` fence and any trailing ``` fence
+    t = re.sub(r"^\s*```(?:json)?\s*", "", t)
+    t = re.sub(r"\s*```\s*$", "", t)
+    t = t.strip()
+    # grab the outermost {...} block
+    start = t.find("{")
+    end = t.rfind("}")
+    if start == -1 or end == -1 or end <= start:
         raise ValueError(f"no JSON object in response: {text[:200]}")
-    return json.loads(m.group(0))
+    return json.loads(t[start:end + 1])
 
 
 def diagnose(defect_class: str, t1_cause: str, attributes: dict,

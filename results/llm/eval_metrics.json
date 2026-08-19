@@ -1,34 +1,136 @@
 {
   "overall": {
-    "n": 4,
-    "structural_validity_pct": 0.0,
-    "grounding_rate_pct": 0.0,
-    "faithfulness_pct": 0.0
+    "n": 21,
+    "structural_validity_pct": 100.0,
+    "grounding_rate_pct": 100.0,
+    "faithfulness_pct": 100.0
   },
   "per_class": {
-    "Rolled pit": {
+    "Oxide scale of plate system": {
       "n": 1,
-      "valid": 0,
-      "ground": 0,
-      "faith": 0
+      "valid": 1,
+      "ground": 1,
+      "faith": 1
     },
-    "Patches": {
+    "Crease": {
       "n": 1,
-      "valid": 0,
-      "ground": 0,
-      "faith": 0
+      "valid": 1,
+      "ground": 1,
+      "faith": 1
+    },
+    "Welding line": {
+      "n": 1,
+      "valid": 1,
+      "ground": 1,
+      "faith": 1
+    },
+    "Iron scale compression": {
+      "n": 1,
+      "valid": 1,
+      "ground": 1,
+      "faith": 1
+    },
+    "Pitted surface": {
+      "n": 1,
+      "valid": 1,
+      "ground": 1,
+      "faith": 1
+    },
+    "Rolled in scale": {
+      "n": 1,
+      "valid": 1,
+      "ground": 1,
+      "faith": 1
+    },
+    "Finishing roll printing": {
+      "n": 1,
+      "valid": 1,
+      "ground": 1,
+      "faith": 1
     },
     "Waist folding": {
       "n": 1,
-      "valid": 0,
-      "ground": 0,
-      "faith": 0
+      "valid": 1,
+      "ground": 1,
+      "faith": 1
     },
     "Iron sheet ash": {
       "n": 1,
-      "valid": 0,
-      "ground": 0,
-      "faith": 0
+      "valid": 1,
+      "ground": 1,
+      "faith": 1
+    },
+    "Red iron sheet": {
+      "n": 1,
+      "valid": 1,
+      "ground": 1,
+      "faith": 1
+    },
+    "Secondary rust skin": {
+      "n": 1,
+      "valid": 1,
+      "ground": 1,
+      "faith": 1
+    },
+    "Oil spot": {
+      "n": 1,
+      "valid": 1,
+      "ground": 1,
+      "faith": 1
+    },
+    "Silk spot": {
+      "n": 1,
+      "valid": 1,
+      "ground": 1,
+      "faith": 1
+    },
+    "Slag inclusion": {
+      "n": 1,
+      "valid": 1,
+      "ground": 1,
+      "faith": 1
+    },
+    "Crescent gap": {
+      "n": 1,
+      "valid": 1,
+      "ground": 1,
+      "faith": 1
+    },
+    "Water spot": {
+      "n": 1,
+      "valid": 1,
+      "ground": 1,
+      "faith": 1
+    },
+    "Bright scratch": {
+      "n": 1,
+      "valid": 1,
+      "ground": 1,
+      "faith": 1
+    },
+    "Crazing": {
+      "n": 1,
+      "valid": 1,
+      "ground": 1,
+      "faith": 1
+    },
+    "Oxide scale of temperature system": {
+      "n": 1,
+      "valid": 1,
+      "ground": 1,
+      "faith": 1
+    },
+    "Inclusion": {
+      "n": 1,
+      "valid": 1,
+      "ground": 1,
+      "faith": 1
+    },
+    "Rolled pit": {
+      "n": 1,
+      "valid": 1,
+      "ground": 1,
+      "faith": 1
     }
   }
 }
