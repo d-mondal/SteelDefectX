@@ -139,6 +139,16 @@ dashboard/  configs/  models/  results/  reports/  notebooks/
 - [x] Frozen stratified split: train=4648, internal-val=806, seed=42 (Rolled pit thinnest 30/5)
 - [x] **TWO FULL U-Net RUNS DONE:** seed0 IoU 78.18, seed1 IoU 77.72 => 77.95 ± 0.23 vs paper 37.49 (+40.46 pts)
       Best classes: Punching 95, Crescent gap 94. Worst: Waist folding 45, Rolled pit 46 (rarest/diffuse).
+- [x] **FULL SWEEP COMPLETE (6 runs, 3 seeds x 2 archs, on Kaggle T4):**
+      U-Net:        IoU 78.51 ± 0.30 | F1max 87.97 ± 0.19 | AUROC 97.70 ± 0.09  (+41.02 IoU vs paper)
+      DeepLabV3+:   IoU 75.22 ± 0.23 | F1max 85.90 ± 0.14 | AUROC 97.29 ± 0.14  (+37.73 IoU vs paper)
+      => U-Net WINS (real gap, non-overlapping error bars). Story: U-Net skip-connections preserve fine
+         detail for small/thin defects; DeepLab atrous design smooths them. Simpler arch won, w/ reason.
+      Both best at sharp defects (Punching 95, Crescent gap 94); both worst at diffuse/rare
+         (Waist folding ~44, Rolled pit ~47, Crazing ~51) => difficulty is in the DATA, not the model.
+      Notable divergence: Silk spot DeepLab 33 vs U-Net 69 (DeepLab's coarse features hurt banded texture).
+      ~78 IoU is a genuinely strong standalone result for a hard, noisy, 25-class binary-seg benchmark.
+      DECISION: proceed to next components; segmentation tuning is a later stretch, not a priority.
 
 ## Fine-tuning framing (for CV + report — state ACCURATELY)
 
@@ -150,10 +160,29 @@ for CLASSIFICATION; we did supervised SEGMENTATION with a CNN. Keep these distin
 
 ## Roadmap order (locked)
 
-1. [ ] **Finish segmentation sweep** — U-Net seed2 + DeepLabV3+ x3 (on Kaggle T4; P100 broke w/ sm_60 CUDA mismatch)
-2. [ ] Uncertainty + calibration (MC-Dropout, ECE, reliability diagram)
+1. [x] **Segmentation sweep COMPLETE** — U-Net + DeepLabV3+ x3 seeds each, done on Kaggle T4. U-Net wins 78.5 vs 75.2.
+2. [ ] **NEXT: Uncertainty + calibration** (MC-Dropout, ECE, reliability diagram) — build on the U-Net (winner)
+       DECISIONS: U-Net only (it's the winner / the model you'd deploy; uncertainty is a deploy-trust feature).
+       METHOD: proper MC-Dropout (named/citable/interview-respected, Gal & Ghahramani 2016 — strong CV line),
+       NOT test-time-augmentation (weak resume value). smp U-Net decoder supports dropout -> add dropout,
+       retrain ONE dropout-U-Net run (~1h Kaggle T4), then ~30 stochastic forward passes for per-pixel
+       uncertainty heatmap + per-image confidence. ECE + reliability diagram on top.
+       HONESTY: dropout-U-Net is a separate variant from the headline 78.5 U-Net; report the uncertainty
+       analysis on the variant, keep the headline seg number as the original 3-seed U-Net. Don't conflate.
 3. [ ] Deterministic T3-style attribute extraction from predicted masks + LLM diagnostic layer
        (grounded in the 25 real T1 cause sentences; diagnostic not descriptive)
+       DECISIONS (locked):
+       - LLM = hosted API, provider-agnostic (call isolated in one fn; swap = 1 line). Resume-legit;
+         the skill shown is CONSTRAINT engineering (structured in, grounded vocab, guards), not model choice.
+       - Pipeline: predicted mask -> [deterministic] T3-style attrs (paper's data_analysis.py formulas)
+         -> [retrieve] T1 cause for the class -> [LLM, constrained] diagnostic note. LLM never sees raw
+         image / never free-invents; it reasons over given facts + given cause. This is the anti-hallucination anchor.
+       - Output = BOTH structured JSON (cause/severity/action) AND prose summary.
+       - Eval = AUTOMATED (human panel not feasible): (1) faithfulness/consistency (output doesn't contradict
+         given attrs), (2) grounding rate (cause drawn from T1 vocab, not invented), (3) structural validity
+         (parses as JSON, all fields present). Report as quantitative %s. Optional tiny self-rated spot-check as bonus.
+       - Contribution framing: paper's T2/T3/T4 are DESCRIPTIVE; paper flags DIAGNOSTIC (cause+action) as
+         future work. This layer does the diagnostic leap = the novel bit.
 4. [ ] Streamlit dashboard MVP
 5. [ ] Report ("paper vs our additions") + public GitHub
 6. [ ] **DEFERRED / CV-earning (do LAST):** reproduce paper's CLIP-Adapter CLASSIFICATION (1-2 configs, ~94% acc).
