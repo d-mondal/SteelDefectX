@@ -295,6 +295,10 @@ def load_llm_eval():
     diagnoses = [json.loads(l) for l in open(d)] if d.exists() else []
     return metrics, diagnoses
 
+@st.cache_data
+def load_classification_metrics():
+    f = RESULTS / "classification" / "classifier_metrics.json"
+    return json.load(open(f)) if f.exists() else None
 
 # ------------------------- inference helpers -------------------------
 MEAN = np.array([0.485, 0.456, 0.406])[None, :, None, None]
@@ -432,8 +436,7 @@ with st.sidebar:
         "Go to",
         [
             "🔍 Inspect",
-            "📊 Analytics",
-            "🧪 Eval results"
+            "📊 Analytics"
         ],
         label_visibility="collapsed",
         key="navigation"
@@ -933,7 +936,37 @@ if page == "🔍 Inspect":
 
 # ===== TAB 2: analytics =====
 elif page == "📊 Analytics":
-    st.subheader("Segmentation: supervised (ours) vs paper zero-shot")
+
+    # ---- Classification (before segmentation) ----
+    st.subheader("Classification: ResNet34 vs CLIP-Adapter")
+    clsm = load_classification_metrics()
+    if clsm:
+        k1, k2, k3 = st.columns(3)
+        k1.metric("Accuracy (ResNet34)", f"{clsm['accuracy']*100:.1f}%")
+        k2.metric("Macro-F1 (ResNet34)", f"{clsm['macro_f1']*100:.1f}%")
+        paper_acc = clsm.get("paper_reference", {}).get("accuracy")
+        if paper_acc:
+            k3.metric("CLIP-Adapter", f"{paper_acc*100:.0f}%",
+                      delta=f"{(clsm['accuracy']-paper_acc)*100:+.1f} pts")
+        st.caption(
+            f"ResNet34 classifier on {clsm['n_val']} val images across {clsm['n_classes']} classes. "
+            "Paper number shown for context — different setup (CLIP-Adapter), so treat as 'comparable to', "
+            "not a strict head-to-head."
+        )
+        with st.expander("per-class classification table"):
+            import pandas as pd
+            cdf = pd.DataFrame([
+                {"Class": c, "Precision": v["precision"], "Recall": v["recall"],
+                 "F1": v["f1"], "n": v["n"]}
+                for c, v in clsm["per_class"].items()
+            ]).sort_values("F1")
+            st.dataframe(cdf, use_container_width=True)
+    else:
+        st.info("ℹ️ Train the classifier (notebook 05) to populate classification metrics.")
+
+    st.divider()
+
+    st.subheader("Segmentation")
     summ = load_seg_summary()
     if summ:
         import pandas as pd
@@ -942,9 +975,9 @@ elif page == "📊 Analytics":
         for metric in ["IoU", "F1max", "AUROC"]:
             rows.append({
                 "Metric": metric,
-                "Paper (zero-shot)": paper[metric],
-                "U-Net (ours)": f"{summ['unet'][metric][0]} ± {summ['unet'][metric][1]}",
-                "DeepLabV3+ (ours)": f"{summ['deeplabv3plus'][metric][0]} ± {summ['deeplabv3plus'][metric][1]}",
+                "Paper": paper[metric],
+                "U-Net": f"{summ['unet'][metric][0]} ± {summ['unet'][metric][1]}",
+                "DeepLabV3+": f"{summ['deeplabv3plus'][metric][0]} ± {summ['deeplabv3plus'][metric][1]}",
             })
         st.table(pd.DataFrame(rows))
         st.success(f"U-Net IoU {summ['unet']['IoU'][0]} vs paper 37.49 "
@@ -966,21 +999,89 @@ elif page == "📊 Analytics":
         st.metric("Expected Calibration Error (ECE)", f"{cal['ECE']}%")
         bins = [b for b in cal["bins"] if b.get("weight")]
         if bins:
-            import matplotlib.pyplot as plt
             conf = [b["conf"] for b in bins]
             acc = [b["acc"] for b in bins]
-            fig, ax = plt.subplots(figsize=(5, 5))
-            ax.plot([0, 1], [0, 1], "k--", label="perfect calibration")
-            ax.plot(conf, acc, "o-", color="#1f77b4", label=f"model (ECE={cal['ECE']}%)")
-            ax.set_xlabel("confidence"); ax.set_ylabel("accuracy")
-            ax.set_xlim(0, 1); ax.set_ylim(0, 1); ax.legend(); ax.set_aspect("equal")
-            st.pyplot(fig)
-            st.caption("Reliability diagram — closer to the dashed diagonal = better calibrated.")
 
-# ===== TAB 3: eval results =====
-elif page == "🧪 Eval results":
+            fig = go.Figure()
+
+            # Perfect calibration line
+            fig.add_trace(
+                go.Scatter(
+                    x=[0, 1],
+                    y=[0, 1],
+                    mode="lines",
+                    name="Perfect calibration",
+                    line=dict(
+                        dash="dash"
+                    ),
+                    hoverinfo="skip"
+                )
+            )
+
+            # Model calibration line
+            fig.add_trace(
+                go.Scatter(
+                    x=conf,
+                    y=acc,
+                    mode="lines+markers",
+                    name=f"Model (ECE={cal['ECE']}%)",
+                    hovertemplate=(
+                        "Confidence: %{x:.2f}<br>"
+                        "Accuracy: %{y:.2f}"
+                        "<extra></extra>"
+                    )
+                )
+            )
+
+            fig.update_layout(
+                xaxis_title="Confidence",
+                yaxis_title="Accuracy",
+                xaxis=dict(
+                    range=[0, 1],
+                    tickformat=".1f"
+                ),
+                yaxis=dict(
+                    range=[0, 1],
+                    tickformat=".1f"
+                ),
+                height=500,
+                hovermode="closest",
+                legend=dict(
+                    orientation="h",
+                    yanchor="bottom",
+                    y=1.02,
+                    xanchor="center",
+                    x=0.5
+                ),
+                margin=dict(
+                    l=50,
+                    r=30,
+                    t=70,
+                    b=50
+                )
+            )
+
+            st.plotly_chart(
+                fig,
+                use_container_width=True,
+                config={
+                    "displaylogo": False,
+                    "scrollZoom": True,
+                    "displayModeBar": "hover"
+                }
+            )
+
+            st.caption("Reliability diagram — closer to the diagonal = better calibrated.")
+
+    # ------------------------------------------------------------
+    # LLM diagnostic evaluation
+    # Kept inside Analytics; the separate Eval results page is removed.
+    # ------------------------------------------------------------
+    st.divider()
     st.subheader("LLM diagnostic evaluation")
+
     metrics, diagnoses = load_llm_eval()
+
     if metrics:
         o = metrics.get("overall", metrics)
         m1, m2, m3, m4 = st.columns(4)
@@ -988,38 +1089,3 @@ elif page == "🧪 Eval results":
         m2.metric("Structural validity", f"{o.get('structural_validity_pct','-')}%")
         m3.metric("Grounding rate", f"{o.get('grounding_rate_pct','-')}%")
         m4.metric("Faithfulness", f"{o.get('faithfulness_pct','-')}%")
-    if diagnoses:
-        st.markdown("**Browse example diagnoses:**")
-        classes = sorted({d["class_name"] for d in diagnoses})
-        pick = st.selectbox("Filter by class", ["(all)"] + classes)
-        shown = [d for d in diagnoses if pick == "(all)" or d["class_name"] == pick]
-        @st.cache_data
-        def fetch_val_img(name):
-            try:
-                from huggingface_hub import hf_hub_download
-                import cv2
-                p = hf_hub_download("Zhaosxian/SteelDefectX", f"val/{name}", repo_type="dataset")
-                return cv2.imread(p, cv2.IMREAD_GRAYSCALE)
-            except Exception:
-                return None
-
-        for r in shown[:30]:
-            d = r["diag"]
-            with st.expander(f"{r['image_name']} · {r['class_name']} · conf={r.get('confidence')}"):
-                ic1, ic2 = st.columns([1, 2])
-                img = fetch_val_img(r["image_name"])
-                if img is not None:
-                    ic1.image(img, caption=r["image_name"], clamp=True, use_container_width=True)
-                ic2.markdown("**Attributes:**")
-                ic2.json({
-                    k: r["attributes"][k]
-                    for k in ("Shape", "Scale", "Polarity", "Saliency")
-                    if k in r.get("attributes", {})
-                })
-
-                ic2.markdown(f"**Cause:** {d.get('likely_cause')}")
-                ic2.markdown(f"**Severity:** {d.get('severity')}")
-                ic2.markdown(f"**Action:** {d.get('recommended_action')}")
-                ic2.markdown(f"**Summary:** {d.get('summary')}")
-    else:
-        st.info("Run the LLM diagnostic notebook to populate results/llm/.")

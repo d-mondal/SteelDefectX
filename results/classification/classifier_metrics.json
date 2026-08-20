@@ -1,0 +1,165 @@
+{
+  "model": "resnet34",
+  "accuracy": 0.9742,
+  "macro_f1": 0.9693,
+  "weighted_f1": 0.9742,
+  "n_val": 2324,
+  "n_classes": 25,
+  "paper_reference": {
+    "method": "CLIP-Adapter",
+    "accuracy": 0.94,
+    "note": "paper number for context; not an identical setup"
+  },
+  "per_class": {
+    "Bright scratch": {
+      "precision": 0.9606,
+      "recall": 0.9531,
+      "f1": 0.9569,
+      "n": 128
+    },
+    "Crazing": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "n": 90
+    },
+    "Crease": {
+      "precision": 0.8077,
+      "recall": 0.9545,
+      "f1": 0.875,
+      "n": 22
+    },
+    "Crescent gap": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "n": 73
+    },
+    "Dark scratches": {
+      "precision": 0.9901,
+      "recall": 1.0,
+      "f1": 0.995,
+      "n": 100
+    },
+    "Finishing roll printing": {
+      "precision": 1.0,
+      "recall": 0.8833,
+      "f1": 0.9381,
+      "n": 60
+    },
+    "Inclusion": {
+      "precision": 0.9492,
+      "recall": 0.9412,
+      "f1": 0.9451,
+      "n": 238
+    },
+    "Iron scale compression": {
+      "precision": 0.9667,
+      "recall": 0.9667,
+      "f1": 0.9667,
+      "n": 60
+    },
+    "Iron sheet ash": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "n": 36
+    },
+    "Oil spot": {
+      "precision": 0.9351,
+      "recall": 0.9664,
+      "f1": 0.9505,
+      "n": 149
+    },
+    "Oxide scale of plate system": {
+      "precision": 0.8947,
+      "recall": 0.9444,
+      "f1": 0.9189,
+      "n": 18
+    },
+    "Oxide scale of temperature system": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "n": 60
+    },
+    "Patches": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "n": 90
+    },
+    "Pitted surface": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "n": 90
+    },
+    "Punching": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "n": 119
+    },
+    "Red iron sheet": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "n": 119
+    },
+    "Rolled in scale": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "n": 90
+    },
+    "Rolled pit": {
+      "precision": 1.0,
+      "recall": 0.7333,
+      "f1": 0.8462,
+      "n": 15
+    },
+    "Secondary rust skin": {
+      "precision": 1.0,
+      "recall": 0.9831,
+      "f1": 0.9915,
+      "n": 59
+    },
+    "Silk spot": {
+      "precision": 0.9941,
+      "recall": 0.9769,
+      "f1": 0.9854,
+      "n": 173
+    },
+    "Slag inclusion": {
+      "precision": 0.9859,
+      "recall": 0.9859,
+      "f1": 0.9859,
+      "n": 71
+    },
+    "Waist folding": {
+      "precision": 0.9833,
+      "recall": 1.0,
+      "f1": 0.9916,
+      "n": 59
+    },
+    "Water spot": {
+      "precision": 0.9245,
+      "recall": 0.9333,
+      "f1": 0.9289,
+      "n": 210
+    },
+    "Welding line": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "n": 150
+    },
+    "White rust": {
+      "precision": 0.9184,
+      "recall": 1.0,
+      "f1": 0.9574,
+      "n": 45
+    }
+  }
+}
