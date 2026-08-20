@@ -32,6 +32,7 @@ python-dotenv>=1.0.0
 
 # --- dashboard ---
 streamlit>=1.30
+plotly
 
 # --- notebooks ---
 jupyter
