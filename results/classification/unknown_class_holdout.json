@@ -1,0 +1,272 @@
+{
+  "n_folds": 5,
+  "classes_hidden_per_fold": 5,
+  "threshold_rule": "reject if top-class probability < threshold; threshold keeps 95% of correct internal-val predictions",
+  "summary_mean_std": {
+    "known_accuracy_pct": [
+      96.6,
+      1.54
+    ],
+    "known_rejected_pct": [
+      6.21,
+      1.41
+    ],
+    "unseen_rejected_pct": [
+      56.29,
+      9.26
+    ],
+    "auroc": [
+      0.9,
+      0.01
+    ]
+  },
+  "folds": [
+    {
+      "fold": 0,
+      "hidden_classes": [
+        "Dark scratches",
+        "Finishing roll printing",
+        "Oxide scale of temperature system",
+        "Punching",
+        "Rolled in scale"
+      ],
+      "best_epoch": 7,
+      "internal_val_accuracy": 0.9497,
+      "threshold": 0.8079,
+      "known_accuracy_pct": 93.77,
+      "known_rejected_pct": 7.28,
+      "unseen_rejected_pct": 52.68,
+      "auroc": 0.8943,
+      "n_known_test": 1895,
+      "n_unseen_test": 429
+    },
+    {
+      "fold": 1,
+      "hidden_classes": [
+        "Bright scratch",
+        "Crease",
+        "Iron scale compression",
+        "Iron sheet ash",
+        "Silk spot"
+      ],
+      "best_epoch": 6,
+      "internal_val_accuracy": 0.9743,
+      "threshold": 0.8959,
+      "known_accuracy_pct": 96.17,
+      "known_rejected_pct": 8.08,
+      "unseen_rejected_pct": 74.7,
+      "auroc": 0.9215,
+      "n_known_test": 1905,
+      "n_unseen_test": 419
+    },
+    {
+      "fold": 2,
+      "hidden_classes": [
+        "Crazing",
+        "Oil spot",
+        "Oxide scale of plate system",
+        "Waist folding",
+        "Welding line"
+      ],
+      "best_epoch": 3,
+      "internal_val_accuracy": 0.9767,
+      "threshold": 0.8479,
+      "known_accuracy_pct": 97.47,
+      "known_rejected_pct": 5.54,
+      "unseen_rejected_pct": 50.43,
+      "auroc": 0.9029,
+      "n_known_test": 1858,
+      "n_unseen_test": 466
+    },
+    {
+      "fold": 3,
+      "hidden_classes": [
+        "Crescent gap",
+        "Pitted surface",
+        "Secondary rust skin",
+        "Water spot",
+        "White rust"
+      ],
+      "best_epoch": 6,
+      "internal_val_accuracy": 0.9797,
+      "threshold": 0.9348,
+      "known_accuracy_pct": 97.73,
+      "known_rejected_pct": 6.12,
+      "unseen_rejected_pct": 50.73,
+      "auroc": 0.8867,
+      "n_known_test": 1847,
+      "n_unseen_test": 477
+    },
+    {
+      "fold": 4,
+      "hidden_classes": [
+        "Inclusion",
+        "Patches",
+        "Red iron sheet",
+        "Rolled pit",
+        "Slag inclusion"
+      ],
+      "best_epoch": 8,
+      "internal_val_accuracy": 0.9823,
+      "threshold": 0.8861,
+      "known_accuracy_pct": 97.88,
+      "known_rejected_pct": 4.02,
+      "unseen_rejected_pct": 52.91,
+      "auroc": 0.8903,
+      "n_known_test": 1791,
+      "n_unseen_test": 533
+    }
+  ],
+  "per_hidden_class": {
+    "Dark scratches": {
+      "fold": 0,
+      "n": 100,
+      "rejected_pct": 61.0,
+      "accepted_mostly_as": "Inclusion"
+    },
+    "Finishing roll printing": {
+      "fold": 0,
+      "n": 60,
+      "rejected_pct": 46.7,
+      "accepted_mostly_as": "Iron sheet ash"
+    },
+    "Oxide scale of temperature system": {
+      "fold": 0,
+      "n": 60,
+      "rejected_pct": 31.7,
+      "accepted_mostly_as": "Red iron sheet"
+    },
+    "Punching": {
+      "fold": 0,
+      "n": 119,
+      "rejected_pct": 42.9,
+      "accepted_mostly_as": "Oil spot"
+    },
+    "Rolled in scale": {
+      "fold": 0,
+      "n": 90,
+      "rejected_pct": 74.4,
+      "accepted_mostly_as": "Pitted surface"
+    },
+    "Bright scratch": {
+      "fold": 1,
+      "n": 128,
+      "rejected_pct": 46.9,
+      "accepted_mostly_as": "White rust"
+    },
+    "Crease": {
+      "fold": 1,
+      "n": 22,
+      "rejected_pct": 68.2,
+      "accepted_mostly_as": "Rolled pit"
+    },
+    "Iron scale compression": {
+      "fold": 1,
+      "n": 60,
+      "rejected_pct": 81.7,
+      "accepted_mostly_as": "Inclusion"
+    },
+    "Iron sheet ash": {
+      "fold": 1,
+      "n": 36,
+      "rejected_pct": 80.6,
+      "accepted_mostly_as": "Slag inclusion"
+    },
+    "Silk spot": {
+      "fold": 1,
+      "n": 173,
+      "rejected_pct": 92.5,
+      "accepted_mostly_as": "Rolled pit"
+    },
+    "Crazing": {
+      "fold": 2,
+      "n": 90,
+      "rejected_pct": 25.6,
+      "accepted_mostly_as": "Patches"
+    },
+    "Oil spot": {
+      "fold": 2,
+      "n": 149,
+      "rejected_pct": 43.0,
+      "accepted_mostly_as": "Water spot"
+    },
+    "Oxide scale of plate system": {
+      "fold": 2,
+      "n": 18,
+      "rejected_pct": 88.9,
+      "accepted_mostly_as": "Finishing roll printing"
+    },
+    "Waist folding": {
+      "fold": 2,
+      "n": 59,
+      "rejected_pct": 54.2,
+      "accepted_mostly_as": "Crease"
+    },
+    "Welding line": {
+      "fold": 2,
+      "n": 150,
+      "rejected_pct": 66.7,
+      "accepted_mostly_as": "Water spot"
+    },
+    "Crescent gap": {
+      "fold": 3,
+      "n": 73,
+      "rejected_pct": 58.9,
+      "accepted_mostly_as": "Punching"
+    },
+    "Pitted surface": {
+      "fold": 3,
+      "n": 90,
+      "rejected_pct": 91.1,
+      "accepted_mostly_as": "Oil spot"
+    },
+    "Secondary rust skin": {
+      "fold": 3,
+      "n": 59,
+      "rejected_pct": 62.7,
+      "accepted_mostly_as": "Oxide scale of plate system"
+    },
+    "Water spot": {
+      "fold": 3,
+      "n": 210,
+      "rejected_pct": 26.7,
+      "accepted_mostly_as": "Oil spot"
+    },
+    "White rust": {
+      "fold": 3,
+      "n": 45,
+      "rejected_pct": 53.3,
+      "accepted_mostly_as": "Bright scratch"
+    },
+    "Inclusion": {
+      "fold": 4,
+      "n": 238,
+      "rejected_pct": 63.9,
+      "accepted_mostly_as": "Water spot"
+    },
+    "Patches": {
+      "fold": 4,
+      "n": 90,
+      "rejected_pct": 11.1,
+      "accepted_mostly_as": "Crazing"
+    },
+    "Red iron sheet": {
+      "fold": 4,
+      "n": 119,
+      "rejected_pct": 68.9,
+      "accepted_mostly_as": "Bright scratch"
+    },
+    "Rolled pit": {
+      "fold": 4,
+      "n": 15,
+      "rejected_pct": 53.3,
+      "accepted_mostly_as": "Silk spot"
+    },
+    "Slag inclusion": {
+      "fold": 4,
+      "n": 71,
+      "rejected_pct": 42.3,
+      "accepted_mostly_as": "Oxide scale of plate system"
+    }
+  }
+}

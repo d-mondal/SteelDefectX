@@ -1,157 +1,241 @@
 {
   "overall": {
-    "n": 250,
+    "n_sampled": 250,
+    "classifier_accuracy_pct": 89.2,
+    "unknown_n": 25,
+    "unknown_pct": 10.0,
+    "n_reports": 225,
+    "review_threshold": 0.9,
+    "review_flagged_n": 50,
+    "review_flagged_pct": 22.2,
+    "llm_input": "predicted class from the ResNet34 classifier",
     "structural_validity_pct": 100.0,
     "grounding_rate_pct": 100.0,
-    "faithfulness_pct": 100.0
+    "faithfulness_pct": 100.0,
+    "correct_cause_pct": 99.1
   },
   "per_class": {
     "Dark scratches": {
       "n": 10,
+      "unknown": 0,
+      "class_right": 10,
+      "reports": 10,
       "valid": 10,
       "ground": 10,
       "faith": 10
     },
     "Rolled in scale": {
       "n": 10,
+      "unknown": 0,
+      "class_right": 10,
+      "reports": 10,
       "valid": 10,
       "ground": 10,
       "faith": 10
     },
     "Welding line": {
       "n": 10,
+      "unknown": 0,
+      "class_right": 10,
+      "reports": 10,
       "valid": 10,
       "ground": 10,
       "faith": 10
     },
     "White rust": {
       "n": 10,
-      "valid": 10,
-      "ground": 10,
-      "faith": 10
+      "unknown": 2,
+      "class_right": 8,
+      "reports": 8,
+      "valid": 8,
+      "ground": 8,
+      "faith": 8
     },
     "Punching": {
       "n": 10,
+      "unknown": 0,
+      "class_right": 10,
+      "reports": 10,
       "valid": 10,
       "ground": 10,
       "faith": 10
     },
     "Inclusion": {
       "n": 10,
-      "valid": 10,
-      "ground": 10,
-      "faith": 10
+      "unknown": 3,
+      "class_right": 7,
+      "reports": 7,
+      "valid": 7,
+      "ground": 7,
+      "faith": 7
     },
     "Crescent gap": {
       "n": 10,
+      "unknown": 0,
+      "class_right": 10,
+      "reports": 10,
       "valid": 10,
       "ground": 10,
       "faith": 10
     },
     "Oil spot": {
       "n": 10,
-      "valid": 10,
-      "ground": 10,
-      "faith": 10
+      "unknown": 1,
+      "class_right": 9,
+      "reports": 9,
+      "valid": 9,
+      "ground": 9,
+      "faith": 9
     },
     "Iron sheet ash": {
       "n": 10,
-      "valid": 10,
-      "ground": 10,
-      "faith": 10
+      "unknown": 1,
+      "class_right": 9,
+      "reports": 9,
+      "valid": 9,
+      "ground": 9,
+      "faith": 9
     },
     "Rolled pit": {
       "n": 10,
-      "valid": 10,
-      "ground": 10,
-      "faith": 10
+      "unknown": 8,
+      "class_right": 0,
+      "reports": 2,
+      "valid": 2,
+      "ground": 2,
+      "faith": 2
     },
     "Crease": {
       "n": 10,
-      "valid": 10,
-      "ground": 10,
-      "faith": 10
+      "unknown": 2,
+      "class_right": 8,
+      "reports": 8,
+      "valid": 8,
+      "ground": 8,
+      "faith": 8
     },
     "Red iron sheet": {
       "n": 10,
+      "unknown": 0,
+      "class_right": 10,
+      "reports": 10,
       "valid": 10,
       "ground": 10,
       "faith": 10
     },
     "Crazing": {
       "n": 10,
+      "unknown": 0,
+      "class_right": 10,
+      "reports": 10,
       "valid": 10,
       "ground": 10,
       "faith": 10
     },
     "Oxide scale of plate system": {
       "n": 10,
-      "valid": 10,
-      "ground": 10,
-      "faith": 10
+      "unknown": 3,
+      "class_right": 7,
+      "reports": 7,
+      "valid": 7,
+      "ground": 7,
+      "faith": 7
     },
     "Silk spot": {
       "n": 10,
-      "valid": 10,
-      "ground": 10,
-      "faith": 10
+      "unknown": 1,
+      "class_right": 9,
+      "reports": 9,
+      "valid": 9,
+      "ground": 9,
+      "faith": 9
     },
     "Oxide scale of temperature system": {
       "n": 10,
-      "valid": 10,
-      "ground": 10,
-      "faith": 10
+      "unknown": 1,
+      "class_right": 9,
+      "reports": 9,
+      "valid": 9,
+      "ground": 9,
+      "faith": 9
     },
     "Patches": {
       "n": 10,
+      "unknown": 0,
+      "class_right": 10,
+      "reports": 10,
       "valid": 10,
       "ground": 10,
       "faith": 10
     },
     "Iron scale compression": {
       "n": 10,
+      "unknown": 0,
+      "class_right": 10,
+      "reports": 10,
       "valid": 10,
       "ground": 10,
       "faith": 10
     },
     "Secondary rust skin": {
       "n": 10,
+      "unknown": 0,
+      "class_right": 10,
+      "reports": 10,
       "valid": 10,
       "ground": 10,
       "faith": 10
     },
     "Waist folding": {
       "n": 10,
+      "unknown": 0,
+      "class_right": 10,
+      "reports": 10,
       "valid": 10,
       "ground": 10,
       "faith": 10
     },
     "Finishing roll printing": {
       "n": 10,
+      "unknown": 0,
+      "class_right": 10,
+      "reports": 10,
       "valid": 10,
       "ground": 10,
       "faith": 10
     },
     "Pitted surface": {
       "n": 10,
+      "unknown": 0,
+      "class_right": 10,
+      "reports": 10,
       "valid": 10,
       "ground": 10,
       "faith": 10
     },
     "Water spot": {
       "n": 10,
-      "valid": 10,
-      "ground": 10,
-      "faith": 10
+      "unknown": 1,
+      "class_right": 9,
+      "reports": 9,
+      "valid": 9,
+      "ground": 9,
+      "faith": 9
     },
     "Bright scratch": {
       "n": 10,
-      "valid": 10,
-      "ground": 10,
-      "faith": 10
+      "unknown": 2,
+      "class_right": 8,
+      "reports": 8,
+      "valid": 8,
+      "ground": 8,
+      "faith": 8
     },
     "Slag inclusion": {
       "n": 10,
+      "unknown": 0,
+      "class_right": 10,
+      "reports": 10,
       "valid": 10,
       "ground": 10,
       "faith": 10

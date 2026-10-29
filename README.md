@@ -40,13 +40,15 @@ diagnostic layer that the original paper flagged as future work.
      ├─► MC-Dropout (30 stochastic passes)  ──►  per-pixel uncertainty + confidence
      │
      ├─► Classifier (ResNet34)  ──►  auto-assigned defect class (25 classes)
+     │        └─ top-class probability < calibrated threshold  ──►  "unknown class:
+     │           requires manual class labelling" (no cause looked up, no LLM report)
      │
      ├─► Deterministic attribute extraction  ──►  shape / scale / polarity / saliency / position …
      │
-     └─► LLM diagnostic layer (grounded in the dataset's cause vocabulary)
+     └─► LLM diagnostic layer (given the PREDICTED class + its dataset cause + the attributes)
                     │
                     └─►  { likely_cause, severity, recommended_action, summary }
-                         + human-review flag when confidence is low
+                         + manual-review flag when segmentation confidence < 90%
 ```
 
 Everything is unified in a **Streamlit dashboard**: upload an image → see the mask, uncertainty
@@ -97,6 +99,19 @@ sharp, well-defined defects (Punching ~0.95, Crescent gap ~0.94) and both strugg
 Accuracy **97.4%**, macro-F1 **96.9%** — comparable to the paper's ~94% CLIP-Adapter result under a
 different setup. Used to auto-assign the class so the diagnostic pipeline runs end-to-end.
 
+> **To be regenerated.** This number came from a run that picked the best epoch on the test split.
+> `05_train_classifier.ipynb` now trains on the frozen train split, picks the epoch on the internal
+> validation split, calibrates the unknown-class threshold there, and evaluates on test once.
+
+**Unknown-class check.** A softmax classifier always names one of its 25 classes, so a prediction whose
+top-class probability is below a threshold is labelled *unknown class, requires manual class labelling*.
+The threshold is calibrated on the internal validation split to keep 95% of correct predictions
+(`models/class_threshold.json`). Notebook 05 reports how often each class is rejected on the test set, and
+runs a **held-out-classes experiment**: 5 folds, each retraining the classifier with 5 classes hidden and
+measuring how many test images of those unseen classes the same threshold rule rejects, plus the AUROC of
+top-class probability for unseen vs known images (`results/classification/unknown_class_holdout.json`).
+Hidden classes are other defects from the same dataset, standing in for a new defect type.
+
 ### Uncertainty & calibration
 
 ECE **1.31%** (well-calibrated), with mild mid-range overconfidence typical of Dice+BCE segmentation.
@@ -104,7 +119,14 @@ See `results/uncertainty/uncertainty_examples.png` for MC-Dropout heatmaps.
 
 ### LLM diagnostics
 
-250 diagnoses (10 per class), **100%** on all three automated metrics. Example (Iron scale compression):
+250 diagnoses (10 per class), **100%** on all three automated metrics.
+
+> **To be regenerated.** That run gave the LLM the dataset's true class. `04_llm_diagnostic_local.ipynb`
+> now gives it the class predicted by the classifier, exactly as the dashboard does, and also reports
+> classifier accuracy on the sample, unknown-class rejections, reports flagged for review, and the share
+> of reports whose cause is the right one (predicted class = true class).
+
+Example (Iron scale compression):
 cause → *"oxide scale mechanically embedded into the hot steel surface during rolling"*; action →
 *"inspect high-pressure descaling header nozzles for clogs; check entry temperature at the rolling mill."*
 
@@ -171,11 +193,12 @@ GEMINI_API_KEY=your-key-here
 ```
 notebooks/02c_train_segmentation_kaggle.ipynb   # segmentation sweep
 notebooks/03_uncertainty_calibration.ipynb      # dropout U-Net + ECE
-notebooks/05_train_classifier.ipynb             # classifier
-notebooks/04_llm_diagnostic_local.ipynb         # LLM diagnostics + eval
+notebooks/05_train_classifier.ipynb             # classifier + unknown-class threshold (run before 04)
+notebooks/04_llm_diagnostic_local.ipynb         # LLM diagnostics + end-to-end eval
 ```
 
-**Dashboard** (needs `models/unet_dropout.pt`, `models/classifier.pt`, and `results/`):
+**Dashboard** (needs `models/unet_dropout.pt`, `models/classifier.pt`, `models/class_names.json`,
+`models/class_threshold.json`, and `results/`):
 
 ```bash
 streamlit run dashboard/app.py

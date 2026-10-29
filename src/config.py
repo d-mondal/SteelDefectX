@@ -4,6 +4,23 @@ from dataclasses import dataclass, field, asdict
 from pathlib import Path
 
 
+# ---------------------------------------------------------------------------
+# Pipeline decision thresholds (shared by the dashboard, the LLM prompt and the
+# LLM evaluation notebook, so all three always apply the same rule).
+# ---------------------------------------------------------------------------
+# Segmentation confidence below this -> the report is still shown but flagged for
+# manual review. Segmentation confidence = mean MC-Dropout probability over the
+# pixels predicted as defect (see predict_with_conf / dashboard predict()).
+REVIEW_CONFIDENCE_THRESHOLD = 0.90
+
+# Unknown-class check after the classifier. The threshold itself is CALIBRATED on the
+# internal validation split by notebook 05 and saved to this file; it is never tuned
+# on the test split.
+UNKNOWN_CLASS_THRESHOLD_FILE = "models/class_threshold.json"
+# Share of correctly classified internal-val images the threshold must still accept.
+UNKNOWN_CLASS_TARGET_ACCEPT = 0.95
+
+
 @dataclass
 class Config:
     # --- data ---

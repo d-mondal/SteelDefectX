@@ -17,6 +17,8 @@ import json
 import os
 import re
 
+from src.config import REVIEW_CONFIDENCE_THRESHOLD
+
 
 SYSTEM_PROMPT = """You are a steel manufacturing quality-control assistant. You convert \
 structured defect measurements into a concise DIAGNOSTIC note for a shop-floor inspector.
@@ -27,7 +29,7 @@ invent a different physical cause. You may rephrase or add mechanism detail cons
 - Base 'severity' on the measured scale and saliency provided (larger + higher saliency = more severe).
 - 'recommended_action' must be a concrete inspection/handling step (e.g. which process stage to check, \
 whether to hold the coil, whether human review is needed).
-- If confidence is low, explicitly recommend human verification.
+- If segmentation confidence is low, explicitly recommend human verification.
 - Be specific and terse. Never describe the image; reason only from the measurements given.
 - Respond ONLY with a JSON object, no prose outside it, with keys exactly: \
 likely_cause, severity, recommended_action, summary. \
@@ -39,11 +41,11 @@ def build_user_prompt(defect_class: str, t1_cause: str, attributes: dict,
     attrs = {k: v for k, v in attributes.items() if k != "_raw"}
     conf_line = ""
     if confidence is not None:
-        conf_line = f"\nModel confidence: {confidence:.2f}"
+        conf_line = f"\nSegmentation confidence: {confidence:.2f}"
         if uncertainty is not None:
             conf_line += f" | mean predictive uncertainty: {uncertainty:.3f}"
         conf_line += ("\n(NOTE: confidence is low — recommend human verification.)"
-                      if confidence < 0.6 else "")
+                      if confidence < REVIEW_CONFIDENCE_THRESHOLD else "")
     return f"""Defect class: {defect_class}
 Known industrial cause for this class (ground your likely_cause in this): "{t1_cause}"
 

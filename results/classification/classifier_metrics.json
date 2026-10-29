@@ -1,10 +1,207 @@
 {
   "model": "resnet34",
-  "accuracy": 0.9742,
-  "macro_f1": 0.9693,
-  "weighted_f1": 0.9742,
+  "accuracy": 0.9729,
+  "macro_f1": 0.9632,
+  "weighted_f1": 0.9726,
   "n_val": 2324,
+  "n_test": 2324,
+  "n_train": 4648,
+  "n_internal_val": 806,
   "n_classes": 25,
+  "evaluated_on": "official val split = held-out test set (never used for selection)",
+  "epoch_selection": {
+    "split": "internal validation",
+    "metric": "accuracy",
+    "best_epoch": 8,
+    "internal_val_accuracy": 0.9764,
+    "internal_val_accuracy_by_epoch": [
+      0.9144,
+      0.9305,
+      0.9256,
+      0.9727,
+      0.9467,
+      0.9603,
+      0.9603,
+      0.9467,
+      0.9764,
+      0.8797
+    ]
+  },
+  "unknown_class_check": {
+    "rule": "reject if top-class probability < threshold",
+    "threshold": 0.8698,
+    "target_accept_of_correct_internal_val": 0.95,
+    "internal_val": {
+      "n": 806,
+      "threshold": 0.8698,
+      "accepted_pct": 93.05,
+      "rejected_n": 56,
+      "accuracy_on_accepted_pct": 99.6,
+      "correct_rejected_pct": 5.08,
+      "errors_caught_pct": 84.21
+    },
+    "test": {
+      "n": 2324,
+      "threshold": 0.8698,
+      "accepted_pct": 93.85,
+      "rejected_n": 143,
+      "accuracy_on_accepted_pct": 99.36,
+      "correct_rejected_pct": 4.16,
+      "errors_caught_pct": 77.78
+    },
+    "test_per_class": {
+      "Bright scratch": {
+        "n": 128,
+        "rejected_n": 16,
+        "rejected_pct": 12.5,
+        "accuracy_on_accepted_pct": 100.0
+      },
+      "Crazing": {
+        "n": 90,
+        "rejected_n": 0,
+        "rejected_pct": 0.0,
+        "accuracy_on_accepted_pct": 100.0
+      },
+      "Crease": {
+        "n": 22,
+        "rejected_n": 6,
+        "rejected_pct": 27.3,
+        "accuracy_on_accepted_pct": 93.8
+      },
+      "Crescent gap": {
+        "n": 73,
+        "rejected_n": 1,
+        "rejected_pct": 1.4,
+        "accuracy_on_accepted_pct": 100.0
+      },
+      "Dark scratches": {
+        "n": 100,
+        "rejected_n": 1,
+        "rejected_pct": 1.0,
+        "accuracy_on_accepted_pct": 99.0
+      },
+      "Finishing roll printing": {
+        "n": 60,
+        "rejected_n": 1,
+        "rejected_pct": 1.7,
+        "accuracy_on_accepted_pct": 100.0
+      },
+      "Inclusion": {
+        "n": 238,
+        "rejected_n": 32,
+        "rejected_pct": 13.4,
+        "accuracy_on_accepted_pct": 97.6
+      },
+      "Iron scale compression": {
+        "n": 60,
+        "rejected_n": 2,
+        "rejected_pct": 3.3,
+        "accuracy_on_accepted_pct": 100.0
+      },
+      "Iron sheet ash": {
+        "n": 36,
+        "rejected_n": 2,
+        "rejected_pct": 5.6,
+        "accuracy_on_accepted_pct": 97.1
+      },
+      "Oil spot": {
+        "n": 149,
+        "rejected_n": 26,
+        "rejected_pct": 17.4,
+        "accuracy_on_accepted_pct": 99.2
+      },
+      "Oxide scale of plate system": {
+        "n": 18,
+        "rejected_n": 6,
+        "rejected_pct": 33.3,
+        "accuracy_on_accepted_pct": 100.0
+      },
+      "Oxide scale of temperature system": {
+        "n": 60,
+        "rejected_n": 1,
+        "rejected_pct": 1.7,
+        "accuracy_on_accepted_pct": 100.0
+      },
+      "Patches": {
+        "n": 90,
+        "rejected_n": 1,
+        "rejected_pct": 1.1,
+        "accuracy_on_accepted_pct": 100.0
+      },
+      "Pitted surface": {
+        "n": 90,
+        "rejected_n": 0,
+        "rejected_pct": 0.0,
+        "accuracy_on_accepted_pct": 100.0
+      },
+      "Punching": {
+        "n": 119,
+        "rejected_n": 3,
+        "rejected_pct": 2.5,
+        "accuracy_on_accepted_pct": 100.0
+      },
+      "Red iron sheet": {
+        "n": 119,
+        "rejected_n": 0,
+        "rejected_pct": 0.0,
+        "accuracy_on_accepted_pct": 100.0
+      },
+      "Rolled in scale": {
+        "n": 90,
+        "rejected_n": 0,
+        "rejected_pct": 0.0,
+        "accuracy_on_accepted_pct": 100.0
+      },
+      "Rolled pit": {
+        "n": 15,
+        "rejected_n": 10,
+        "rejected_pct": 66.7,
+        "accuracy_on_accepted_pct": 40.0
+      },
+      "Secondary rust skin": {
+        "n": 59,
+        "rejected_n": 2,
+        "rejected_pct": 3.4,
+        "accuracy_on_accepted_pct": 100.0
+      },
+      "Silk spot": {
+        "n": 173,
+        "rejected_n": 4,
+        "rejected_pct": 2.3,
+        "accuracy_on_accepted_pct": 100.0
+      },
+      "Slag inclusion": {
+        "n": 71,
+        "rejected_n": 2,
+        "rejected_pct": 2.8,
+        "accuracy_on_accepted_pct": 98.6
+      },
+      "Waist folding": {
+        "n": 59,
+        "rejected_n": 2,
+        "rejected_pct": 3.4,
+        "accuracy_on_accepted_pct": 100.0
+      },
+      "Water spot": {
+        "n": 210,
+        "rejected_n": 17,
+        "rejected_pct": 8.1,
+        "accuracy_on_accepted_pct": 99.5
+      },
+      "Welding line": {
+        "n": 150,
+        "rejected_n": 0,
+        "rejected_pct": 0.0,
+        "accuracy_on_accepted_pct": 100.0
+      },
+      "White rust": {
+        "n": 45,
+        "rejected_n": 8,
+        "rejected_pct": 17.8,
+        "accuracy_on_accepted_pct": 100.0
+      }
+    }
+  },
   "paper_reference": {
     "method": "CLIP-Adapter",
     "accuracy": 0.94,
@@ -12,9 +209,9 @@
   },
   "per_class": {
     "Bright scratch": {
-      "precision": 0.9606,
-      "recall": 0.9531,
-      "f1": 0.9569,
+      "precision": 0.9841,
+      "recall": 0.9688,
+      "f1": 0.9764,
       "n": 128
     },
     "Crazing": {
@@ -24,9 +221,9 @@
       "n": 90
     },
     "Crease": {
-      "precision": 0.8077,
-      "recall": 0.9545,
-      "f1": 0.875,
+      "precision": 0.9048,
+      "recall": 0.8636,
+      "f1": 0.8837,
       "n": 22
     },
     "Crescent gap": {
@@ -36,45 +233,45 @@
       "n": 73
     },
     "Dark scratches": {
-      "precision": 0.9901,
-      "recall": 1.0,
-      "f1": 0.995,
+      "precision": 0.9802,
+      "recall": 0.99,
+      "f1": 0.9851,
       "n": 100
     },
     "Finishing roll printing": {
       "precision": 1.0,
-      "recall": 0.8833,
-      "f1": 0.9381,
+      "recall": 1.0,
+      "f1": 1.0,
       "n": 60
     },
     "Inclusion": {
-      "precision": 0.9492,
-      "recall": 0.9412,
-      "f1": 0.9451,
+      "precision": 0.9489,
+      "recall": 0.937,
+      "f1": 0.9429,
       "n": 238
     },
     "Iron scale compression": {
-      "precision": 0.9667,
-      "recall": 0.9667,
-      "f1": 0.9667,
+      "precision": 0.9365,
+      "recall": 0.9833,
+      "f1": 0.9593,
       "n": 60
     },
     "Iron sheet ash": {
       "precision": 1.0,
-      "recall": 1.0,
-      "f1": 1.0,
+      "recall": 0.9444,
+      "f1": 0.9714,
       "n": 36
     },
     "Oil spot": {
-      "precision": 0.9351,
-      "recall": 0.9664,
-      "f1": 0.9505,
+      "precision": 0.951,
+      "recall": 0.9128,
+      "f1": 0.9315,
       "n": 149
     },
     "Oxide scale of plate system": {
-      "precision": 0.8947,
+      "precision": 0.9444,
       "recall": 0.9444,
-      "f1": 0.9189,
+      "f1": 0.9444,
       "n": 18
     },
     "Oxide scale of temperature system": {
@@ -90,9 +287,9 @@
       "n": 90
     },
     "Pitted surface": {
-      "precision": 1.0,
+      "precision": 0.9677,
       "recall": 1.0,
-      "f1": 1.0,
+      "f1": 0.9836,
       "n": 90
     },
     "Punching": {
@@ -114,51 +311,51 @@
       "n": 90
     },
     "Rolled pit": {
-      "precision": 1.0,
-      "recall": 0.7333,
-      "f1": 0.8462,
+      "precision": 0.8182,
+      "recall": 0.6,
+      "f1": 0.6923,
       "n": 15
     },
     "Secondary rust skin": {
       "precision": 1.0,
-      "recall": 0.9831,
-      "f1": 0.9915,
+      "recall": 1.0,
+      "f1": 1.0,
       "n": 59
     },
     "Silk spot": {
-      "precision": 0.9941,
-      "recall": 0.9769,
-      "f1": 0.9854,
+      "precision": 0.9718,
+      "recall": 0.9942,
+      "f1": 0.9829,
       "n": 173
     },
     "Slag inclusion": {
-      "precision": 0.9859,
+      "precision": 0.9091,
       "recall": 0.9859,
-      "f1": 0.9859,
+      "f1": 0.9459,
       "n": 71
     },
     "Waist folding": {
-      "precision": 0.9833,
-      "recall": 1.0,
-      "f1": 0.9916,
+      "precision": 0.9828,
+      "recall": 0.9661,
+      "f1": 0.9744,
       "n": 59
     },
     "Water spot": {
-      "precision": 0.9245,
-      "recall": 0.9333,
-      "f1": 0.9289,
+      "precision": 0.9387,
+      "recall": 0.9476,
+      "f1": 0.9431,
       "n": 210
     },
     "Welding line": {
-      "precision": 1.0,
+      "precision": 0.9934,
       "recall": 1.0,
-      "f1": 1.0,
+      "f1": 0.9967,
       "n": 150
     },
     "White rust": {
-      "precision": 0.9184,
-      "recall": 1.0,
-      "f1": 0.9574,
+      "precision": 0.9773,
+      "recall": 0.9556,
+      "f1": 0.9663,
       "n": 45
     }
   }

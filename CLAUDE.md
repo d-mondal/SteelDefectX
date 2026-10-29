@@ -150,6 +150,25 @@ dashboard/  configs/  models/  results/  reports/  notebooks/
       ~78 IoU is a genuinely strong standalone result for a hard, noisy, 25-class binary-seg benchmark.
       DECISION: proceed to next components; segmentation tuning is a later stretch, not a priority.
 
+## Pipeline changes (Oct 2026) — code done, results NOT yet regenerated
+
+- **Unknown-class check** after the classifier: top-class softmax probability < threshold → label
+  "Unknown class (requires manual class labelling)", no T1 cause lookup, no LLM call (mask, uncertainty and
+  attributes still shown). Threshold calibrated in notebook 05 on the INTERNAL-VAL split to keep
+  `UNKNOWN_CLASS_TARGET_ACCEPT` (95%) of correct predictions → `models/class_threshold.json`.
+  Notebook 05 also reports per-class rejection on test and a held-out-classes experiment (5 folds x 5 hidden
+  classes; unseen-rejected %, known-rejected %, AUROC) → `results/classification/unknown_class_holdout.json`.
+  Only claim "flags new defect types" to the extent that experiment supports it.
+- **Manual-review flag** = segmentation confidence < `REVIEW_CONFIDENCE_THRESHOLD` (0.90, was 0.6).
+  Both thresholds live in `src/config.py`.
+- **Classifier epoch selection** now on the internal-val split (train on train_ids only, test once).
+  The old 97.4% / 96.9% was selected on the test split → must be re-run (notebook 05).
+- **LLM evaluation** now feeds the classifier's PREDICTED class (as the dashboard does); the true class
+  is only used for scoring. New metrics: classifier accuracy on the sample, unknown-class rejections,
+  review-flagged reports, correct-cause rate (pred = true). The old 100/100/100 run used true classes
+  → must be re-run (notebook 04 local, after 05). The old records are archived automatically as
+  `results/llm/diagnoses_trueclass_input.jsonl`.
+
 ## Fine-tuning framing (for CV + report — state ACCURATELY)
 
 We fine-tuned an **ImageNet-pretrained ResNet34 encoder** (full fine-tune, backbone NOT frozen) + trained a

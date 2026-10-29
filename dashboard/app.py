@@ -3,7 +3,8 @@ SteelDefectX — Explainable Defect Inspection Dashboard (Streamlit)
 
 Ties the whole system into one demo:
   Tab 1  Inspect: upload an image -> segmentation mask + MC-Dropout uncertainty heatmap
-                  -> deterministic T3 attributes -> LLM diagnostic note -> human-review flag.
+                  -> deterministic T3 attributes -> classifier (unknown-class check)
+                  -> LLM diagnostic note -> manual-review flag (segmentation confidence < 90%).
   Tab 2  Analytics: segmentation head-to-head, per-class IoU, calibration summary.
   Tab 3  Eval results: browse the LLM diagnostic evaluation + example notes.
 
@@ -11,7 +12,8 @@ LLM mode: tries a LIVE call; if the key is missing / quota is hit / it errors, i
 to a cached diagnosis from the eval run so the demo never breaks in front of an audience.
 
 Run:  streamlit run dashboard/app.py
-Needs:  models/unet_dropout.pt, results/*, and (for live LLM) GEMINI_API_KEY in env.
+Needs:  models/unet_dropout.pt, models/classifier.pt + class_names.json + class_threshold.json,
+        results/*, and (for live LLM) GEMINI_API_KEY in env.
 """
 import os
 import sys
@@ -33,6 +35,7 @@ except Exception:
 # make 'src' importable when run from repo root
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
+from src.config import REVIEW_CONFIDENCE_THRESHOLD, UNKNOWN_CLASS_THRESHOLD_FILE
 try:
     from dotenv import load_dotenv as _ld
     _ld(ROOT / ".env")
@@ -227,6 +230,7 @@ st.html("""
 CKPT = str(ROOT / "models" / "unet_dropout.pt")
 CLS_CKPT = str(ROOT / "models" / "classifier.pt")
 CLS_NAMES = str(ROOT / "models" / "class_names.json")
+CLS_THRESHOLD = str(ROOT / UNKNOWN_CLASS_THRESHOLD_FILE)
 RESULTS = ROOT / "results"
 LLM_MODEL = "gemini-3.5-flash-lite"   # model used for the eval run
 
@@ -234,28 +238,36 @@ LLM_MODEL = "gemini-3.5-flash-lite"   # model used for the eval run
 # ------------------------- cached loaders -------------------------
 @st.cache_resource
 def load_model():
-    import torch
-    from src.segmentation.model import build_model
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    model = build_model("unet", "resnet34", None, dropout=0.2)
-    model.load_state_dict(torch.load(CKPT, map_location=device))
-    model.to(device).eval()
-    return model, device
+    try:
+        import torch
+        from src.segmentation.model import build_model
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        model = build_model("unet", "resnet34", None, dropout=0.2)
+        model.load_state_dict(torch.load(CKPT, map_location=device))
+        model.to(device).eval()
+        return model, device
+    except Exception as e:
+        return None, str(e)
 
 
 @st.cache_resource
 def load_classifier():
-    """Returns (net, class_names, device) or (None, None, None) if not trained yet."""
+    """Returns (net, class_names, device, unknown_threshold).
+    net is None if the classifier is not trained yet; unknown_threshold is None if notebook 05
+    has not been re-run to calibrate it (then no prediction is rejected)."""
     if not (os.path.exists(CLS_CKPT) and os.path.exists(CLS_NAMES)):
-        return None, None, None
-    import torch
-    from src.segmentation.classifier import build_classifier
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    names = json.load(open(CLS_NAMES))
-    net = build_classifier(len(names), pretrained=False)
-    net.load_state_dict(torch.load(CLS_CKPT, map_location=device))
-    net.to(device).eval()
-    return net, names, device
+        return None, None, None, None
+    try:
+        import torch
+        from src.segmentation.classifier import build_classifier, load_unknown_threshold
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        names = json.load(open(CLS_NAMES))
+        net = build_classifier(len(names), pretrained=False)
+        net.load_state_dict(torch.load(CLS_CKPT, map_location=device))
+        net.to(device).eval()
+        return net, names, device, load_unknown_threshold(CLS_THRESHOLD)
+    except Exception as e:
+        return None, None, None, None
 
 
 @st.cache_data
@@ -296,6 +308,11 @@ def load_llm_eval():
     return metrics, diagnoses
 
 @st.cache_data
+def load_unknown_holdout():
+    f = RESULTS / "classification" / "unknown_class_holdout.json"
+    return json.load(open(f)) if f.exists() else None
+
+@st.cache_data
 def load_classification_metrics():
     f = RESULTS / "classification" / "classifier_metrics.json"
     return json.load(open(f)) if f.exists() else None
@@ -332,11 +349,12 @@ def try_live_llm(cls, t1_cause, attrs, conf, unc_mean):
 def cached_llm_for_class(cls, diagnoses):
     """Fallback: a cached diagnosis of the same class from the eval run."""
     for r in diagnoses:
-        if r.get("class_name") == cls and r.get("diag", {}).get("_valid"):
+        # match on the class the LLM was given (pred_class in the end-to-end run)
+        if r.get("pred_class", r.get("class_name")) == cls and (r.get("diag") or {}).get("_valid"):
             return r["diag"]
     # otherwise any valid one
     for r in diagnoses:
-        if r.get("diag", {}).get("_valid"):
+        if (r.get("diag") or {}).get("_valid"):
             return r["diag"]
     return None
 
@@ -350,7 +368,7 @@ def confidence_color(c):
     """3-tier color for a 0-1 confidence score."""
     if c is None:
         return "#57606a"
-    if c >= 0.8:
+    if c >= REVIEW_CONFIDENCE_THRESHOLD:
         return "#1a7f37"
     if c >= 0.6:
         return "#bf8700"
@@ -465,13 +483,16 @@ if page == "🔍 Inspect":
             label_visibility="collapsed"
         )
 
-    net_cls, cls_names, cls_device = load_classifier()
+    net_cls, cls_names, cls_device, unknown_thr = load_classifier()
     if net_cls is None:
         st.caption("ℹ️ Classifier not found — train it (notebook 05) to auto-assign the class. "
                    "You can still pick the class manually below.")
         manual_class = st.selectbox("Defect class (manual)", options=sorted(load_t1().keys()))
     else:
         manual_class = None
+        if unknown_thr is None:
+            st.caption("ℹ️ Unknown-class threshold not calibrated yet (re-run notebook 05 to create "
+                       "models/class_threshold.json), so no class prediction is rejected.")
 
     st.write("")
 
@@ -502,6 +523,13 @@ if page == "🔍 Inspect":
         st.session_state.inspection_results = {}
 
         model, device = load_model()
+        if model is None:
+            st.error(
+                f"⚠️ **Could not load PyTorch segmentation model:**\n\n`{device}`\n\n"
+                "**If Windows Smart App Control is enabled:** Windows blocks unsigned PyTorch binaries (`_C.pyd`). "
+                "To enable live neural network inference, open **Windows Security → App & browser control → Smart App Control settings** and set it to **Evaluation** or **Off**."
+            )
+            st.stop()
 
         for i, file in enumerate(up):
 
@@ -560,14 +588,24 @@ if page == "🔍 Inspect":
             # ----------------------------------------------------
             t1 = load_t1()
 
-            if net_cls is not None:
-                from src.segmentation.classifier import predict_class
+            is_unknown = False
 
-                cls, cls_conf, _ = predict_class(
+            if net_cls is not None:
+                from src.segmentation.classifier import predict_class, apply_unknown_threshold
+
+                top_cls, cls_conf, _ = predict_class(
                     net_cls,
                     gray,
                     cls_names,
                     cls_device
+                )
+
+                # Unknown-class check: below the calibrated threshold the class is not trusted,
+                # so the image is labelled for manual class labelling and no cause is looked up.
+                cls, is_unknown = apply_unknown_threshold(
+                    top_cls,
+                    cls_conf,
+                    unknown_thr
                 )
             else:
                 cls = manual_class
@@ -582,19 +620,23 @@ if page == "🔍 Inspect":
 
             diag, source = None, None
 
-            try:
-                diag = try_live_llm(
-                    cls,
-                    t1[cls],
-                    attrs,
-                    conf,
-                    float(unc.mean())
-                )
-                source = "live"
+            if is_unknown:
+                # no class -> no dataset cause to ground a report in -> no LLM call
+                source = "skipped (unknown class)"
+            else:
+                try:
+                    diag = try_live_llm(
+                        cls,
+                        t1[cls],
+                        attrs,
+                        conf,
+                        float(unc.mean())
+                    )
+                    source = "live"
 
-            except Exception:
-                diag = cached_llm_for_class(cls, diagnoses)
-                source = "cached (live unavailable)"
+                except Exception:
+                    diag = cached_llm_for_class(cls, diagnoses)
+                    source = "cached (live unavailable)"
 
             # ----------------------------------------------------
             # Save EVERYTHING in session state
@@ -613,6 +655,7 @@ if page == "🔍 Inspect":
                 "attrs": attrs,
                 "cls": cls,
                 "cls_conf": cls_conf,
+                "is_unknown": is_unknown,
                 "diag": diag,
                 "source": source,
             }
@@ -729,14 +772,14 @@ if page == "🔍 Inspect":
                 )
 
             # ----------------------------------------------------
-            # Model confidence
+            # Segmentation confidence -> manual-review flag
             # ----------------------------------------------------
-            low_conf = conf < 0.6
+            low_conf = conf < REVIEW_CONFIDENCE_THRESHOLD
 
             with st.container(horizontal_alignment="center"):
 
                 confidence_badge(
-                    "Model confidence",
+                    "Segmentation confidence",
                     conf
                 )
 
@@ -748,7 +791,7 @@ if page == "🔍 Inspect":
                             font-weight:600;
                             color:{confidence_color(conf)};
                         ">
-                            ⚠️ Low confidence — human review advised
+                            ⚠️ Segmentation confidence below {REVIEW_CONFIDENCE_THRESHOLD:.0%} — flagged for manual review
                         </div>
                         """,
                         unsafe_allow_html=True
@@ -791,7 +834,7 @@ if page == "🔍 Inspect":
                     "⚪"
                 )
 
-                cls_html = f"🔧 {cls}"
+                cls_html = f"{'❓' if is_unknown else '🔧'} {cls}"
 
                 if cls_conf is not None:
                     cls_html += (
@@ -896,6 +939,15 @@ if page == "🔍 Inspect":
                         """
                     )
 
+            elif is_unknown:
+                st.warning(
+                    f"Classifier confidence {cls_conf:.2f} is below the unknown-class threshold "
+                    f"{unknown_thr:.2f}, so this defect does not match any of the 25 known classes "
+                    "with enough confidence. It requires manual class labelling; no cause or "
+                    "diagnostic note is generated. The mask, uncertainty map and measured "
+                    "attributes are still shown."
+                )
+
             else:
                 st.warning(
                     "No diagnosis available "
@@ -949,10 +1001,56 @@ elif page == "📊 Analytics":
             k3.metric("CLIP-Adapter", f"{paper_acc*100:.0f}%",
                       delta=f"{(clsm['accuracy']-paper_acc)*100:+.1f} pts")
         st.caption(
-            f"ResNet34 classifier on {clsm['n_val']} val images across {clsm['n_classes']} classes. "
-            "Paper number shown for context — different setup (CLIP-Adapter), so treat as 'comparable to', "
-            "not a strict head-to-head."
+            f"ResNet34 classifier on {clsm.get('n_test', clsm['n_val'])} held-out test images across "
+            f"{clsm['n_classes']} classes"
+            + (f"; epoch chosen on the internal validation split (epoch {clsm['epoch_selection']['best_epoch']})"
+               if clsm.get("epoch_selection") else "")
+            + ". Paper number shown for context — different setup (CLIP-Adapter), so treat as "
+            "'comparable to', not a strict head-to-head."
         )
+        ucc = clsm.get("unknown_class_check")
+        if ucc:
+            te = ucc["test"]
+            u1, u2, u3 = st.columns(3)
+            u1.metric("Unknown-class threshold", f"{ucc['threshold']:.2f}")
+            u2.metric("Test images rejected", f"{te['rejected_n']} ({100 - te['accepted_pct']:.1f}%)")
+            u3.metric("Accuracy on accepted", f"{te['accuracy_on_accepted_pct']}%")
+            st.caption(
+                "Rejected images are labelled for manual class labelling. Threshold calibrated on the "
+                "internal validation split to keep "
+                f"{ucc['target_accept_of_correct_internal_val']:.0%} of correct predictions; "
+                + (f"on test it catches {te['errors_caught_pct']}% of classifier errors."
+                   if te.get("errors_caught_pct") is not None else "on test the classifier made no errors.")
+            )
+            if ucc.get("test_per_class"):
+                with st.expander("per-class rejection on the test set"):
+                    import pandas as pd
+                    rdf = pd.DataFrame([
+                        {"Class": c, "n": v["n"], "Rejected": v["rejected_n"], "Rejected %": v["rejected_pct"],
+                         "Accuracy on accepted %": v["accuracy_on_accepted_pct"]}
+                        for c, v in ucc["test_per_class"].items()
+                    ]).sort_values("Rejected %", ascending=False)
+                    st.dataframe(rdf, use_container_width=True, hide_index=True)
+
+        ho = load_unknown_holdout()
+        if ho:
+            sm = ho["summary_mean_std"]
+            st.markdown("**Held-out-classes test** (5 classes hidden from training per fold, "
+                        f"{ho['n_folds']} fold(s))")
+            h1, h2, h3 = st.columns(3)
+            h1.metric("Unseen defect types rejected",
+                      f"{sm['unseen_rejected_pct'][0]:.1f}% ± {sm['unseen_rejected_pct'][1]:.1f}")
+            h2.metric("Known defect types rejected",
+                      f"{sm['known_rejected_pct'][0]:.1f}% ± {sm['known_rejected_pct'][1]:.1f}")
+            h3.metric("AUROC (unseen vs known)", f"{sm['auroc'][0]:.3f} ± {sm['auroc'][1]:.3f}")
+            with st.expander("per hidden class"):
+                import pandas as pd
+                hdf = pd.DataFrame([
+                    {"Hidden class": c, "Fold": v["fold"], "n": v["n"], "Rejected %": v["rejected_pct"],
+                     "If accepted, taken as": v["accepted_mostly_as"]}
+                    for c, v in ho["per_hidden_class"].items()
+                ]).sort_values("Rejected %")
+                st.dataframe(hdf, use_container_width=True, hide_index=True)
         with st.expander("per-class classification table"):
             import pandas as pd
             cdf = pd.DataFrame([
@@ -1084,8 +1182,17 @@ elif page == "📊 Analytics":
 
     if metrics:
         o = metrics.get("overall", metrics)
+        if "n_sampled" in o:   # end-to-end run: the LLM was given the PREDICTED class
+            p1, p2, p3, p4 = st.columns(4)
+            p1.metric("Images sampled", o["n_sampled"])
+            p2.metric("Classifier accuracy", f"{o['classifier_accuracy_pct']}%")
+            p3.metric("Unknown class (no report)", o["unknown_n"])
+            p4.metric(f"Flagged for review (<{o['review_threshold']:.0%})", o["review_flagged_n"])
+            st.caption("The LLM was given the class predicted by the classifier, as in the Inspect tab. "
+                       f"Correct cause (predicted class = true class): {o.get('correct_cause_pct', '-')}% "
+                       "of generated reports.")
         m1, m2, m3, m4 = st.columns(4)
-        m1.metric("Samples", o.get("n", len(diagnoses)))
+        m1.metric("Reports", o.get("n_reports", o.get("n", len(diagnoses))))
         m2.metric("Structural validity", f"{o.get('structural_validity_pct','-')}%")
         m3.metric("Grounding rate", f"{o.get('grounding_rate_pct','-')}%")
         m4.metric("Faithfulness", f"{o.get('faithfulness_pct','-')}%")
