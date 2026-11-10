@@ -1,0 +1,177 @@
+[
+ {
+  "class_name": "Bright scratch",
+  "image_name": "bs_427.jpg",
+  "iou_unet": 0.7775,
+  "iou_deeplab": 0.7643,
+  "seg_confidence": 0.9492
+ },
+ {
+  "class_name": "Crazing",
+  "image_name": "cracking_236.jpg",
+  "iou_unet": 0.5157,
+  "iou_deeplab": 0.4571,
+  "seg_confidence": 0.8551
+ },
+ {
+  "class_name": "Crease",
+  "image_name": "crease_31.jpg",
+  "iou_unet": 0.6932,
+  "iou_deeplab": 0.7469,
+  "seg_confidence": 0.9297
+ },
+ {
+  "class_name": "Crescent gap",
+  "image_name": "cg_104.jpg",
+  "iou_unet": 0.951,
+  "iou_deeplab": 0.9726,
+  "seg_confidence": 0.9684
+ },
+ {
+  "class_name": "Dark scratches",
+  "image_name": "ds_268.jpg",
+  "iou_unet": 0.8223,
+  "iou_deeplab": 0.8559,
+  "seg_confidence": 0.9695
+ },
+ {
+  "class_name": "Finishing roll printing",
+  "image_name": "frp_17.jpg",
+  "iou_unet": 0.728,
+  "iou_deeplab": 0.6582,
+  "seg_confidence": 0.9454
+ },
+ {
+  "class_name": "Inclusion",
+  "image_name": "in_525.jpg",
+  "iou_unet": 0.6747,
+  "iou_deeplab": 0.7092,
+  "seg_confidence": 0.9678
+ },
+ {
+  "class_name": "Iron scale compression",
+  "image_name": "Isc_165.jpg",
+  "iou_unet": 0.7989,
+  "iou_deeplab": 0.7926,
+  "seg_confidence": 0.9642
+ },
+ {
+  "class_name": "Iron sheet ash",
+  "image_name": "Isa_17.jpg",
+  "iou_unet": 0.7971,
+  "iou_deeplab": 0.7994,
+  "seg_confidence": 0.9608
+ },
+ {
+  "class_name": "Oil spot",
+  "image_name": "os_185.jpg",
+  "iou_unet": 0.8657,
+  "iou_deeplab": 0.8888,
+  "seg_confidence": 0.9861
+ },
+ {
+  "class_name": "Oxide scale of plate system",
+  "image_name": "Ops_23.jpg",
+  "iou_unet": 0.8118,
+  "iou_deeplab": 0.7239,
+  "seg_confidence": 0.9444
+ },
+ {
+  "class_name": "Oxide scale of temperature system",
+  "image_name": "Ots_23.jpg",
+  "iou_unet": 0.5499,
+  "iou_deeplab": 0.5689,
+  "seg_confidence": 0.9013
+ },
+ {
+  "class_name": "Patches",
+  "image_name": "pa_152.jpg",
+  "iou_unet": 0.8543,
+  "iou_deeplab": 0.8708,
+  "seg_confidence": 0.9534
+ },
+ {
+  "class_name": "Pitted surface",
+  "image_name": "ps_47.jpg",
+  "iou_unet": 0.5809,
+  "iou_deeplab": 0.44,
+  "seg_confidence": 0.8853
+ },
+ {
+  "class_name": "Punching",
+  "image_name": "pu_346.jpg",
+  "iou_unet": 0.9533,
+  "iou_deeplab": 0.9639,
+  "seg_confidence": 0.9886
+ },
+ {
+  "class_name": "Red iron sheet",
+  "image_name": "ris_264.jpg",
+  "iou_unet": 0.826,
+  "iou_deeplab": 0.8245,
+  "seg_confidence": 0.9562
+ },
+ {
+  "class_name": "Rolled in scale",
+  "image_name": "rs_213.jpg",
+  "iou_unet": 0.5712,
+  "iou_deeplab": 0.5402,
+  "seg_confidence": 0.901
+ },
+ {
+  "class_name": "Rolled pit",
+  "image_name": "rp_41.jpg",
+  "iou_unet": 0.5035,
+  "iou_deeplab": 0.8178,
+  "seg_confidence": 0.9301
+ },
+ {
+  "class_name": "Secondary rust skin",
+  "image_name": "Srs_189.jpg",
+  "iou_unet": 0.809,
+  "iou_deeplab": 0.8321,
+  "seg_confidence": 0.9562
+ },
+ {
+  "class_name": "Silk spot",
+  "image_name": "ss_160.jpg",
+  "iou_unet": 0.7459,
+  "iou_deeplab": 0.3284,
+  "seg_confidence": 0.8771
+ },
+ {
+  "class_name": "Slag inclusion",
+  "image_name": "si_16.jpg",
+  "iou_unet": 0.7374,
+  "iou_deeplab": 0.7415,
+  "seg_confidence": 0.9084
+ },
+ {
+  "class_name": "Waist folding",
+  "image_name": "wf_89.jpg",
+  "iou_unet": 0.4531,
+  "iou_deeplab": 0.4286,
+  "seg_confidence": 0.8916
+ },
+ {
+  "class_name": "Water spot",
+  "image_name": "ws_622.jpg",
+  "iou_unet": 0.8675,
+  "iou_deeplab": 0.8441,
+  "seg_confidence": 0.975
+ },
+ {
+  "class_name": "Welding line",
+  "image_name": "wl_305.jpg",
+  "iou_unet": 0.7979,
+  "iou_deeplab": 0.8811,
+  "seg_confidence": 0.9767
+ },
+ {
+  "class_name": "White rust",
+  "image_name": "wr_67.jpg",
+  "iou_unet": 0.7663,
+  "iou_deeplab": 0.8083,
+  "seg_confidence": 0.9534
+ }
+]
