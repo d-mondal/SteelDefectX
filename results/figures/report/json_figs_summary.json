@@ -1,0 +1,16 @@
+{
+ "cls_best_epoch_1based": 9,
+ "unet_resnet34_seed0_epochs": 40,
+ "unet_resnet34_seed0_best_val_iou": 79.77,
+ "unet_resnet34_seed1_epochs": 40,
+ "unet_resnet34_seed1_best_val_iou": 79.35,
+ "unet_resnet34_seed2_epochs": 27,
+ "unet_resnet34_seed2_best_val_iou": 77.03,
+ "review_flag_pct_at_0.6": 0.0,
+ "review_flag_pct_at_0.9": 22.2,
+ "severity_counts": {
+  "moderate": 112,
+  "low": 46,
+  "high": 67
+ }
+}

@@ -1,0 +1,32 @@
+{
+ "test_n": 2324,
+ "test_accuracy_pct": 97.29,
+ "unet_mean_image_iou": 74.08,
+ "deeplab_mean_image_iou": 70.06,
+ "defect_area_median_pct": 4.97,
+ "defect_area_share_below_10pct": 67.9,
+ "top_confused_pairs": [
+  "Oil spot -> Water spot: 7",
+  "Oil spot -> Inclusion: 6",
+  "Inclusion -> Water spot: 6",
+  "Water spot -> Inclusion: 5",
+  "Water spot -> Oil spot: 4",
+  "Rolled pit -> Slag inclusion: 3",
+  "Inclusion -> Oil spot: 3",
+  "Inclusion -> Iron scale compression: 3"
+ ],
+ "unet_share_images_iou_below_0.5_pct": 9.6,
+ "worst_images": [
+  "rp_15.jpg (Rolled pit, IoU 0.02)",
+  "wf_169.jpg (Waist folding, IoU 0.04)",
+  "ss_296.jpg (Silk spot, IoU 0.05)",
+  "ss_319.jpg (Silk spot, IoU 0.06)"
+ ],
+ "unet_pixel_auroc_hist": 99.03,
+ "dl_pixel_auroc_hist": 98.67,
+ "uncertainty_iou_spearman": -0.695,
+ "uncertainty_ratio_wrong_vs_correct_pixels": 10.2,
+ "mc_subset_n": 399,
+ "mean_iou_passed": 0.775,
+ "mean_iou_flagged": 0.509
+}
